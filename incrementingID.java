@@ -18,3 +18,9 @@ public class Segment{
     public SegmentType getSegmentType() { return segmentType; }
     
 }
+
+
+// array list looks like (from stage.java):
+
+    ArrayList<Segment> segments = new ArrayList<Segment>();
+    public ArrayList<Segment> getSegments() { return segments; }
