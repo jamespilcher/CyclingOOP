@@ -2,15 +2,14 @@ features of the storage system.
 
 
 Rider:
-//increase when registering rider results in stage, this time corresponds 
-// to this type of segment, they get this many points in this category
 
 totalElapsedTime:     //based on adjusted elapsed time.
 totalMountainPoints:  //
 totalSprintPoints:    //
 
 
-//tempStageResults
+//tempStageResults:
+
 localTime timeForThisStage: ___	        //finish-start time.
 localTime AdjustedTimeForThisStage: ___ //calc adjusted time
 int sprintpointsForThisStage: ____      //need methods to calc using the corresponding times. we use the array given when adding rider times, and the sorted list of segment     int mountainPointsForThisStage: ___     //objects (sorted by location, as the array of times given corresponds to this.) that is stored in a given stage object.
@@ -28,7 +27,7 @@ list of rider objects = [___]   // figure out how to sort. add riders when 'regi
                                 //find the corresponding riders objects in the list that is in the portal using the riderID that is given when adding rider results in stage 
 
 
-list, rider ranks = riderIDs sorted by elapsed time in stage.         //just pull the desired 'tempStageResults' out of the rider object list
+list, rider ranks = riderIDs sorted by elapsed time in stage.         //just pull the desired '//tempStageResults' out of each rider in the rider object list
 list of adjustedtime = []
 list of sprintspoints = []
 list mountainpoints = [ , ,  , , , ]
