@@ -12,8 +12,8 @@ totalSprintPoints:    //
 localTime timeForThisStage: ___	        //finish-start time.
 localTime AdjustedTimeForThisStage: ___ //calc adjusted time
 int sprintpointsForThisStage: ____      //need methods to calc using the corresponding times. we use the array given when adding rider times, and the sorted list of segment     int mountainPointsForThisStage: ___     //objects (sorted by location, as the array of times given corresponds to this.) that is stored in a given stage object.
-                                        // array of times looks like ( [starttime, segment1time, segment2time, finishtime] )
-                                        // segment array looks like ( [Sprint, HillClimb])
+                                        // array of times could look like ( [starttime, segment1time, segment2time, finishtime] )
+                                        // corresponding segment array could be ( [Sprint, HillClimb])
                                         // therefore we know segment 1 time applies to sprint, while segment2time applies to hill climb.
                                         // work out the points for each classification following the specification.
 
