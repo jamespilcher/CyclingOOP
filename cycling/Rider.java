@@ -12,7 +12,7 @@ public class Rider{
         this.riderYearOfBirth=riderYearOfBirth;
         this.riderName=riderName;
         this.teamID=teamID;
-        riderID=++numberofRiders;
+        this.riderID=++numberofRiders;
     }
 
     public int getTeamID() {return teamID;}
