@@ -9,6 +9,8 @@ totalElapsedTime:     //based on adjusted elapsed time.
 totalMountainPoints:  //
 totalSprintPoints:    //
 
+
+//tempStageResults
 localTime timeForThisStage: ___	        //finish-start time.
 localTime AdjustedTimeForThisStage: ___ //calc adjusted time
 int sprintpointsForThisStage: ____      //need methods to calc using the corresponding times. we use the array given when adding rider times, and the sorted list of segment     int mountainPointsForThisStage: ___     //objects (sorted by location, as the array of times given corresponds to this.) that is stored in a given stage object.
@@ -26,9 +28,7 @@ list of rider objects = [___]   // figure out how to sort. add riders when 'regi
                                 //find the corresponding riders objects in the portal using the riderID that is given when adding rider results in stage 
 
 
-list, rider ranks = riderIDs sorted by elapsed time in stage.
-
-list of rider
+list, rider ranks = riderIDs sorted by elapsed time in stage.         //just pull the desired 'tempStageResults' out of the rider object list
 list of adjustedtime = []
 list of sprintspoints = []
 list mountainpoints = [ , ,  , , , ]
@@ -36,6 +36,9 @@ list of riders points [] =
 
 ----------------------------------------------------------------
 
+
+
+fullfils the following:
 
 - get adjusted times for each rider for a given stage (a list of times, sorted by time)
 - be able to get riders finishing positions for a given stage (a list of riderIDs sorted by their times)
