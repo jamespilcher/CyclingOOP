@@ -25,7 +25,7 @@ int sprintpointsForThisStage: ____      //need methods to calc using the corresp
 within stage class:
 
 list of rider objects = [___]   // figure out how to sort. add riders when 'register rider resu;lts'. 
-                                //find the corresponding riders objects in the portal using the riderID that is given when adding rider results in stage 
+                                //find the corresponding riders objects in the list that is in the portal using the riderID that is given when adding rider results in stage 
 
 
 list, rider ranks = riderIDs sorted by elapsed time in stage.         //just pull the desired 'tempStageResults' out of the rider object list
