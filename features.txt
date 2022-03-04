@@ -47,19 +47,3 @@ fullfils the following:
 
 - register rider results in stage. 
 
-
-
-
-
-
-
-
-
-
-
-- when a thing is created, add it to the parent class. method to do so?
-- when a rider is created, we need its parent object to also add it to its list of riders.
-
-
-
-- a list of team objects should be made whenever a team is made. also for the getTeams funciton in the interface
