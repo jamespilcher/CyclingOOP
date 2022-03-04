@@ -1,0 +1,58 @@
+features of the storage system.
+
+
+Rider:
+//increase when registering rider results in stage, this time corresponds 
+// to this type of segment, they get this many points in this category
+
+totalElapsedTime:     //based on adjusted elapsed time.
+totalMountainPoints:  //
+totalSprintPoints:    //
+
+localTime timeForThisStage: ___	        //calc adjusted time
+localTime AdjustedTimeForThisStage: ___ //
+int sprintpointsForThisStage: ____      //need methods to calc using the corresponding times
+int mountainPointsForThisStage: ___     //
+
+----------------------------------------------------------------
+
+within stage class:
+
+list of rider objects = [___]   // figure out how to sort
+
+
+list, rider ranks = riderIDs sorted by elapsed time in stage.
+
+list of rider
+list of adjustedtime = []
+list of sprintspoints = []
+list mountainpoints = [ , ,  , , , ]
+list of riders points [] = 
+
+----------------------------------------------------------------
+
+
+- get adjusted times for each rider for a given stage (a list of times, sorted by time)
+- be able to get riders finishing positions for a given stage (a list of riderIDs sorted by their times)
+- get a list of riders points, sorted by elapsed time. within a stage
+- get a list of mountain points, sorted by finish time (elapsed time). within stage
+- remove stage results from a rider. (from both the rider and stage end and segments)
+
+- register rider results in stage. 
+
+
+
+
+
+
+
+
+
+
+
+- when a thing is created, add it to the parent class. method to do so?
+- when a rider is created, we need its parent object to also add it to its list of riders.
+
+
+
+- a list of team objects should be made whenever a team is made. also for the getTeams funciton in the interface
