@@ -18,7 +18,8 @@ int mountainPointsForThisStage: ___     //
 
 within stage class:
 
-list of rider objects = [___]   // figure out how to sort
+list of rider objects = [___]   // figure out how to sort. add riders when 'register rider resu;lts'. 
+                                //find the corresponding riders objects in the portal using the riderID that is given when adding rider results in stage 
 
 
 list, rider ranks = riderIDs sorted by elapsed time in stage.
