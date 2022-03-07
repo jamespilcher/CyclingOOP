@@ -377,7 +377,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *                                  system.
 	 * @throws IllegalArgumentException If the name of the rider is null or the year
 	 *                                  of birth is less than 1900.
-	 */		return 0;
+	 */
+		if (yearOfBirth<1900 || name==null){
+			throw new IllegalArgumentException("Name of rider is null or year of birth is less than 1900");
+		}
+		Team correspondingTeam=null;
+		boolean teamIdExists=false;
+		for (Team team : teamList){
+			if (team.getTeamID()==teamID){
+				teamIdExists=true;
+				correspondingTeam=team;
+				break;
+			}
+		}
+		if(!teamIdExists){
+			throw new IDNotRecognisedException("The given team ID does not match to any team in the system");
+		}
+		Rider newRider= new Rider(yearOfBirth, name, teamID);
+		riderList.add(newRider);
+		correspondingTeam.addRider(newRider);
+		return newRider.getRiderID();
 	}
 
 	@Override
