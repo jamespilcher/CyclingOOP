@@ -17,7 +17,7 @@ class Race {
     }
 
     public void addStage(Stage stage){
-        this.stages.add(stage);
+        stages.add(stage);
     }
 
     public ArrayList<Stage> getSegments() { return stages; }
