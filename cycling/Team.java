@@ -20,7 +20,7 @@ public class Team {
         riders.add(rider);
     }
 
-    public ArryList<Rider> getRiders(){return riders;}
+    public ArrayList<Rider> getRiders(){return riders;}
     public int getTeamID(){return teamID;}
     public String getTeamName(){return teamName;}
     public String getTeamDescription(){return teamDescription;}
