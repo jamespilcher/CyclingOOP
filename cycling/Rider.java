@@ -1,5 +1,4 @@
 package cycling;
-import java.util.ArrayList;
 public class Rider{
     private int riderID;
     private String riderName;
@@ -16,6 +15,6 @@ public class Rider{
     }
 
     public int getTeamID() {return teamID;}
-    public int setTeamID(int teamID) {this.teamID=teamID;}
+    public void setTeamID(int teamID) {this.teamID=teamID;}
     public int getRiderID() {return riderID;}
 }
