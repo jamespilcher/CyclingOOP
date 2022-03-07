@@ -16,6 +16,10 @@ class Race {
         this.raceID = ++numberOfRaces;
     }
 
+    public void addStage(Stage stage){
+        this.stages.add(stage);
+    }
+
     public ArrayList<Stage> getSegments() { return stages; }
     public int getRaceID() { return raceID; }
     public String getName() { return name; }
