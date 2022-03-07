@@ -18,7 +18,7 @@ public class Team {
     }
 
     public void addRider(Rider rider){
-        this.riders.add(rider);
+        riders.add(rider);
     }
 
     public ArryList<Rider> getRiders(){return riders;}
