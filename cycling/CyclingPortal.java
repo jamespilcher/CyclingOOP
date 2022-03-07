@@ -56,8 +56,16 @@ public class CyclingPortal implements CyclingPortalInterface {
          * 
          */        
 
+        if ( (name == null) || name == "" || name.length() > 30 || name.contains(" ")){
+            throw new InvalidNameException("Race name is null, empty, has more than 30 chars, or has whitespaces");
+        }  
+        for (Race race : raceList) {
+            if (name == race.getName()){
+                throw new IllegalNameException("Race name already exists in the platform.");
+            }
+        }
         Race newRace = new Race(name, description);
-        this.raceList.add(newRace);
+        raceList.add(newRace);
 		return newRace.getRaceID();
 	}
 
@@ -134,17 +142,36 @@ public class CyclingPortal implements CyclingPortalInterface {
          *                              	characters, or has white spaces.
          * @throws InvalidLengthException   If the length is less than 5km.
          */	
-        Stage newStage = new Stage(raceId, stageName, description, length, startTime, type);
-        this.stageList.add(newStage);
         //ADD TO RACE OBJECTS LIST.
-        for (Race race : this.raceList) {
-            if (raceId == race.getRaceID()){
-                Race correspondingRace = race;
-                correspondingRace.addStage(newStage); //adding stage to the objects list
-                break;                                 //might have to sort the stages?
-                                                    //check for exceptions
+		if (length < 5D){
+			throw new InvalidLengthException("Length is less than 5km");
+		}
+        if ( (stageName == null) || stageName == "" || stageName.length() > 30 || stageName.contains(" ")){
+            throw new InvalidNameException("Stage name is null, empty, has more than 30 chars, or has whitespaces");
+        }  
+
+        for (Stage stage : stageList) {
+            if (stageName == stage.getStageName()) {
+                throw new IllegalNameException("Stage name already exists in the platform.");
             }
         }
+
+        boolean raceIdExists = false;
+        Race correspondingRace = null;
+        for (Race race : raceList) {
+            if (raceId == race.getRaceID()){
+                raceIdExists = true;
+                correspondingRace = race;
+               // correspondingRace.addStage(newStage); //adding stage to the objects list
+                break;                                 //might have to sort the stages?                                                    //check for exceptions
+            }
+        }
+        if (!raceIdExists){
+            throw new IDNotRecognisedException("The ID does not match to any race in the system.");
+        }
+        Stage newStage = new Stage(raceId, stageName, description, length, startTime, type);
+        correspondingRace.addStage(newStage);
+        stageList.add(newStage);
         return newStage.getStageID();
 	}
 
