@@ -17,6 +17,10 @@ public class Team {
         this.teamID=++numberOfTeams;
     }
 
+    public void addRider(Rider rider){
+        this.riders.add(rider);
+    }
+
     public ArryList<Rider> getRiders(){return riders;}
     public ArryList<Team> getTeams(){return teams;}
     public int getTeamID(){return teamID;}
