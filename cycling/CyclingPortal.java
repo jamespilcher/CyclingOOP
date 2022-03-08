@@ -376,7 +376,15 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @return The list of IDs from the teams in the system. An empty list if there
 	 *         are no teams in the system.
 	 * 
-	 */		return null;
+	 */	if (teamList.size()==0){
+		 return null; // This potentially needs to be changed to an empty int[] instead of null
+	 	}
+	 	List<Integer> teamIDs= new ArrayList<Integer>();
+		for (Team team : teamList){
+			teamIDs.add(team.getTeamID());
+		}
+		System.out.println("hi");
+		return teamIDs.stream().mapToInt(i -> i).toArray();
 	}
 
 	@Override
