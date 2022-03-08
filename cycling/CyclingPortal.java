@@ -338,10 +338,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @throws InvalidNameException If the name is null, empty, has more than 30
 	 *                              characters, or has white spaces.
 	 */
-        
+		if (name == null || name=="" || name.length()>30 || name.contains(" "){
+			throw new InvalidNameException("Team name is null, empty, has more than 30 characters, or has whitespaces");
+		}
+		for (Team team : teamList){
+			if (name==team.getTeamName()){
+				throw new IllegalNameException("Team name already exists in the platform");
+			}
+		}
         Team newTeam = new Team(name, description);
-        this.teamList.add(newTeam);
-		return 0;
+        teamList.add(newTeam);
+		return newTeam.getTeamID();
 	}
 
 	@Override
