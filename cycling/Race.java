@@ -20,7 +20,7 @@ class Race {
         stages.add(stage);
     }
 
-    public ArrayList<Stage> getSegments() { return stages; }
+    public ArrayList<Stage> getStages() { return stages; }
     public int getRaceID() { return raceID; }
     public String getName() { return name; }
     public String getDescription() { return description; }
