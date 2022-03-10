@@ -118,7 +118,15 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @return The number of stages created for the race.
 	 * @throws IDNotRecognisedException If the ID does not match to any race in the
 	 *                                  system.
-	 */		return 0;
+	 */
+		int numOfStages=0;
+		for (Race race: raceList){
+			if (race.getRaceID()==raceId){
+				numOfStages=race.getStages().size();
+			}
+			return numOfStages;
+		}
+		throw new IDNotRecognisedException("Race ID not recognised");
 	}
 
 	@Override
