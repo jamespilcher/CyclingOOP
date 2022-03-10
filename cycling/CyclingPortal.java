@@ -399,7 +399,20 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @return A list with riders' ID.
 	 * @throws IDNotRecognisedException If the ID does not match to any team in the
 	 *                                  system.
-	 */		return null;
+	 */	
+		List<Rider> ridersInTeam=new ArrayList<Rider>();
+		List<Integer> teamRidersIDs=new ArrayList<Integer>();
+		for (Team team : teamList) {
+			if (team.getTeamID() == teamId) {
+				ridersInTeam=team.getRiders();
+				for (Rider rider : ridersInTeam){
+					teamRidersIDs.add(rider.getRiderID());
+				}
+				return teamRidersIDs.stream().mapToInt(i->i).toArray();
+			}
+		}
+		throw new IDNotRecognisedException("Invalid team ID entered");
+
 	}
 
 	@Override
