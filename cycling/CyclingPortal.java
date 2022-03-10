@@ -217,7 +217,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @return The stage's length.
 	 * @throws IDNotRecognisedException If the ID does not match to any stage in the
 	 *                                  system.
-	 */		return 0;
+	 */
+		for (Stage stage : stageList){
+			if (stage.getStageID()==stageId){
+				return stage.getLength();
+			}
+		}
+		throw new IDNotRecognisedException("Stage ID not recognized");
 	}
 
 	@Override
