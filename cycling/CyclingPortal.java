@@ -35,7 +35,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * Get the races currently created in the platform.
 	 * 
 	 * @return An array of race IDs in the system or an empty array if none exists.
-	 */		return null;
+	 */
+		List<Integer> raceIds = new ArrayList<Integer>();
+		for (Race race: raceList) {
+			raceIds.add(race.getRaceID());
+		}
+		return raceIds.stream().mapToInt(i -> i).toArray();
 	}
 
 	@Override
