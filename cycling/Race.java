@@ -19,6 +19,10 @@ class Race {
     public void addStage(Stage stage){
         stages.add(stage);
     }
+    
+    public void removeStage(Stage stage){
+        stages.remove(stage);
+    }
 
     public ArrayList<Stage> getStages() { return stages; }
     public int getRaceID() { return raceID; }
