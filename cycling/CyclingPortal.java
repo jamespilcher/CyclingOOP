@@ -413,7 +413,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *         stage.
 	 * @throws IDNotRecognisedException If the ID does not match to any stage in the
 	 *                                  system.
-	 */		return null;
+	 */		
+		if (stageList.size() == 0){
+			return null;
+		}
+		List<Integer> segmentIDs = new ArrayList<Integer>();
+		for (Segment segment : segmentList) {
+			if (segment.getStageID()==stageId){
+				segmentIDs.add(segment.getSegmentID());
+			}
+		}
+		return segmentIDs.stream().mapToInt(i->i).toArray();
 	}
 
 	@Override
