@@ -24,5 +24,7 @@ public class Team {
     public int getTeamID(){return teamID;}
     public String getTeamName(){return teamName;}
     public String getTeamDescription(){return teamDescription;}
+    public void deleteRiders(){ riders.clear();}
+
 
 }
