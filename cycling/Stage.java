@@ -31,10 +31,6 @@ class Stage {
         segments.add(segment);
     }
     
-    public void removeStage(Stage stage){
-        stages.remove(stage);
-    }
-
     public ArrayList<Segment> getSegments() { return segments; }
     public int getStageID() { return stageID; }
     public int getRaceID() { return raceID; }
