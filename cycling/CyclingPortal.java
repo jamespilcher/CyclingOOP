@@ -238,6 +238,33 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @throws IDNotRecognisedException If the ID does not match to any stage in the
 	 *                                  system.
 	 */
+		boolean stageFound=false;
+		for (Stage stage : stageList){
+			if (stage.getStageID()==stageId){
+				stageFound=true;
+				stageList.remove(stage);
+				stage.deleteSegments();
+				stage=null;
+				break;
+			}
+		}
+		if (!stageFound){ throw new IDNotRecognisedException("Stage ID " + stageId + " not found in system");}
+		for (Race race : raceList){
+			ArrayList<Stage> currentStages=race.getStages();
+			for (Stage stage : currentStages){
+				if (stage.getStageID()==stageId){
+					race.removeStage(stage);
+					break;
+				}
+			}
+		}
+		for (Segment segment : segmentList){
+			if (segment.getStageID()==stageId){
+				segmentList.remove(segment);
+				segment=null;
+				break;
+			}
+		}
 	}
 
 	@Override
