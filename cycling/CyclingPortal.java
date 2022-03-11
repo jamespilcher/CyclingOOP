@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * CyclingPortal is an implementor of the CyclingPortalInterface interface.
@@ -466,6 +467,22 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @throws IDNotRecognisedException If the ID does not match to any team in the
 	 *                                  system.
 	 */
+		for (Team team : teamList) {
+			if (team.getTeamID()==teamId) {
+				teamList.remove(team);
+				team.deleteRiders();
+				team=null;
+				return;
+			}
+		}
+
+		for (Rider rider: riderList) {
+			if (rider.getTeamID()==teamId) {
+				riderList.remove(rider);
+				rider=null;
+			}
+		}
+		throw new IDNotRecognisedException("No team found with ID " + teamId);
 	}
 
 	@Override
@@ -486,7 +503,6 @@ public class CyclingPortal implements CyclingPortalInterface {
 		for (Team team : teamList){
 			teamIDs.add(team.getTeamID());
 		}
-		System.out.println("hi");
 		return teamIDs.stream().mapToInt(i -> i).toArray();
 	}
 
