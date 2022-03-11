@@ -27,6 +27,10 @@ class Stage {
         this.stageID = ++numberOfStages;
     }
 
+    public void addSegment(Segment segment){
+        segments.add(segment);
+    }
+
     public ArrayList<Segment> getSegments() { return segments; }
     public int getStageID() { return stageID; }
     public int getRaceID() { return raceID; }
@@ -35,5 +39,4 @@ class Stage {
     public String getDescription() { return description; }
     public double getLength() {return length;}
     public LocalDateTime getStartTime() { return startTime; }
-
 }
