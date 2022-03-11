@@ -39,4 +39,6 @@ class Stage {
     public String getDescription() { return description; }
     public double getLength() {return length;}
     public LocalDateTime getStartTime() { return startTime; }
+    public void deleteSegments(){ segments.clear();}
+
 }
