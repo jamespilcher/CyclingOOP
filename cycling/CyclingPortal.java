@@ -244,6 +244,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 	public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
 			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
 			InvalidStageTypeException {
+		public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
+			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
+			InvalidStageTypeException {
 	/**
 	 * Adds a climb segment to a stage.
 	 * <p>
@@ -267,7 +270,30 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @throws InvalidStageStateException If the stage is "waiting for results".
 	 * @throws InvalidStageTypeException  Time-trial stages cannot contain any
 	 *                                    segment.
-	 */		return 0;
+	 */
+	boolean stageIdExists = false;
+	Stage correspondingStage = null;
+	for (Stage stage : stageList) {
+		if (stageId == stage.getStageID()){
+			stageIdExists = true;
+			correspondingStage = stage;
+			break;
+		}
+	}
+	if (!stageIdExists){
+		throw new IDNotRecognisedException("The ID does not match to any race in the system.");
+	}
+	if (correspondingStage.getType() == StageType.TT){
+		throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");                
+	}
+	if (location > correspondingStage.getLength()){
+		throw new InvalidLocationException("Segment location is out of bounds of the stage length.");
+	}
+
+	Segment newClimb = new ClimbSegment(stageId, type, location, averageGradient, length);
+	correspondingStage.addSegment(newClimb);
+	segmentList.add(newClimb);
+	return newClimb.getSegmentID();
 	}
 
 	@Override
@@ -292,7 +318,31 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @throws InvalidStageStateException If the stage is "waiting for results".
 	 * @throws InvalidStageTypeException  Time-trial stages cannot contain any
 	 *                                    segment.
-	 */		return 0;
+	 */		
+	boolean stageIdExists = false;
+	Stage correspondingStage = null;
+	for (Stage stage : stageList) {
+		if (stageId == stage.getStageID()){
+			stageIdExists = true;
+			correspondingStage = stage;
+		   // correspondingRace.addStage(newStage); //adding stage to the objects list
+			break;                                 //might have to sort the stages?                                                    //check for exceptions
+		}
+	}
+	if (!stageIdExists){
+		throw new IDNotRecognisedException("The ID does not match to any race in the system.");
+	}
+	if (correspondingStage.getType() == StageType.TT){
+		throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");                
+	}
+	if (location > correspondingStage.getLength()){
+		throw new InvalidLocationException("Segment location is out of bounds of the stage length.");
+	}
+
+	Segment newSprint = new Segment(stageId, SegmentType.SPRINT, location);
+	correspondingStage.addSegment(newSprint);
+	segmentList.add(newSprint);
+	return newSprint.getSegmentID();
 	}
 
 	@Override
