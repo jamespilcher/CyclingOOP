@@ -3,10 +3,10 @@ package cycling;
 
 //abstract class then override
 //time, length, 
-public class Segment{
-    private int segmentID;
+public class Segment extends IdHaver{
+    private int id;
     private int stageID;
-    private double location;
+    private Double location;
     private SegmentType type;
     
     private static int numberOfSegments = 0;
@@ -16,11 +16,13 @@ public class Segment{
         this.stageID = stageID;
         this.type = type;
         this.location = location;
-        this.segmentID = ++numberOfSegments;
+        id = ++numberOfSegments;
+        super.setId(id);
+
     }
 
-    public int getSegmentID() { return segmentID; }
+    public int getId() { return id; }
     public int getStageID() { return stageID; }
-    public double getLocation() { return location;}
+    public Double getLocation() { return location;}
     public SegmentType getSegmentType() { return type; }
 }
