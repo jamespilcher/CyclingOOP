@@ -1,8 +1,8 @@
 package cycling;
 import java.util.ArrayList;
-public class Team {
+public class Team extends IdHaver{
 
-    private int teamID;
+    private int id;
     private String teamName;
     private String teamDescription;
 
@@ -13,18 +13,28 @@ public class Team {
     public Team(String teamName, String teamDescription){
         this.teamName=teamName;
         this.teamDescription=teamDescription;
-        this.teamID=++numberOfTeams;
+        id=++numberOfTeams;
+        super.setId(id);
     }
 
     public void addRider(Rider rider){
         riders.add(rider);
     }
 
+    public void removeRider(Rider rider){
+        riders.remove(rider);
+    }
+
+    //not needed now?
+    public void deleteRiders(){
+        riders.clear();
+    }
+
+
     public ArrayList<Rider> getRiders(){return riders;}
-    public int getTeamID(){return teamID;}
+    public int getId(){return id;}
     public String getTeamName(){return teamName;}
     public String getTeamDescription(){return teamDescription;}
-    public void deleteRiders(){ riders.clear();}
 
 
 }
