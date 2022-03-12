@@ -574,11 +574,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 		 */	
 			List<Rider> ridersInTeam=new ArrayList<Rider>();
 			List<Integer> teamRidersIDs=new ArrayList<Integer>();
-			Team correspondingTeam = correspondingObjectFinder(teamId, teamList);
-			if (correspondingTeam == null) {
+			Team team = correspondingObjectFinder(teamId, teamList);
+			if (team == null) {
 				throw new IDNotRecognisedException("No team found with ID " + teamId);
 			}
-			ridersInTeam=correspondingTeam.getRiders();
+			ridersInTeam=team.getRiders();
 			for (Rider rider : ridersInTeam){
 				teamRidersIDs.add(rider.getId());
 			}
@@ -606,14 +606,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (yearOfBirth<1900 || name==null){
 			throw new IllegalArgumentException("Name of rider is null or year of birth is less than 1900");
 		}
-		Team correspondingTeam = correspondingObjectFinder(teamID, teamList);
-		if (correspondingTeam == null){
+		Team team = correspondingObjectFinder(teamID, teamList);
+		if (team == null){
 			throw new IDNotRecognisedException("The given team ID does not match to any team in the system");
 		}
 
 		Rider newRider= new Rider(yearOfBirth, name, teamID);
 		riderList.add(newRider);
-		correspondingTeam.addRider(newRider);
+		team.addRider(newRider);
 		return newRider.getId();
 	}
 
