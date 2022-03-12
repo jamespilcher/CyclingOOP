@@ -1,6 +1,6 @@
 package cycling;
-public class Rider{
-    private int riderID;
+public class Rider extends IdHaver{
+    private int id;
     private String riderName;
     private int riderYearOfBirth;
     private int teamID;
@@ -11,10 +11,11 @@ public class Rider{
         this.riderYearOfBirth=riderYearOfBirth;
         this.riderName=riderName;
         this.teamID=teamID;
-        this.riderID=++numberofRiders;
+        id=++numberofRiders;
+        super.setId(id);
     }
 
     public int getTeamID() {return teamID;}
     public void setTeamID(int teamID) {this.teamID=teamID;}
-    public int getRiderID() {return riderID;}
+    public int getId() {return id;}
 }
