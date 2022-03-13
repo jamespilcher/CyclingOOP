@@ -1,15 +1,19 @@
 features of the storage system.
 
 
-Rider:
-
+normal rider object will have:
 //RaceResults
-totalElapsedTimeForRace:     //based on adjusted elapsed time.
-totalMountainPointsForRace:  //
+totalElapsedTimeForRace:     //based on adjusted elapsed time. //scan through every single stage, at each stage look at all of its riderstageresultobjects. any matching Ids, add 
+totalMountainPointsForRace:  //to total elapsed time, total mountain points, and total points.
 totalPointsForRace:    //
 
 
-//StageResults:
+RiderStageResults Class: object
+int Id
+StageId
+
+
+//StageResults:     
 localTime elapsedTimeForThisStage: ___	        //finish minus start time.
 localTime AdjustedTimeForThisStage: ___ //calc adjusted time
 int sprintpointsForThisStage: ____      //need methods to calc using the corresponding times. we use the array given when adding rider times, and the sorted list of segment     int mountainPointsForThisStage: ___     //objects (sorted by location, as the array of times given corresponds to this.) that is stored in a given stage object.
@@ -23,18 +27,18 @@ int sprintpointsForThisStage: ____      //need methods to calc using the corresp
 
 within stage class:
 
-arrayList<Rider> ridersThatCompeted = new array<>
+arrayList<RiderStageResults> ridersThatCompeted = new array<>
+
+
+//just pull the desired results out of each rider in the rider object list.
+// easily sort by elapsed time.
 
 
 list of rider objects = [___]   // figure out how to sort. add riders when 'register rider resu;lts'. 
                                 //find the corresponding riders objects in the list that is in the portal using the riderID that is given when adding rider results in stage 
 
+       
 
-list, rider ranks = riderIDs sorted by elapsed time in stage.         //just pull the desired '//tempStageResults' out of each rider in the rider object list
-list of adjustedtime = []
-list of sprintspoints = []
-list mountainpoints = [ , ,  , , , ]
-list of riders points [] = 
 
 ----------------------------------------------------------------
 
