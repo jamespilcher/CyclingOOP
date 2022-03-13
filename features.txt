@@ -3,14 +3,14 @@ features of the storage system.
 
 Rider:
 
-totalElapsedTime:     //based on adjusted elapsed time.
-totalMountainPoints:  //
-totalSprintPoints:    //
+//RaceResults
+totalElapsedTimeForRace:     //based on adjusted elapsed time.
+totalMountainPointsForRace:  //
+totalPointsForRace:    //
 
 
-//tempStageResults:
-
-localTime timeForThisStage: ___	        //finish-start time.
+//StageResults:
+localTime elapsedTimeForThisStage: ___	        //finish minus start time.
 localTime AdjustedTimeForThisStage: ___ //calc adjusted time
 int sprintpointsForThisStage: ____      //need methods to calc using the corresponding times. we use the array given when adding rider times, and the sorted list of segment     int mountainPointsForThisStage: ___     //objects (sorted by location, as the array of times given corresponds to this.) that is stored in a given stage object.
                                         // array of times could look like ( [starttime, segment1time, segment2time, finishtime] )
@@ -22,6 +22,9 @@ int sprintpointsForThisStage: ____      //need methods to calc using the corresp
 ----------------------------------------------------------------
 
 within stage class:
+
+arrayList<Rider> ridersThatCompeted = new array<>
+
 
 list of rider objects = [___]   // figure out how to sort. add riders when 'register rider resu;lts'. 
                                 //find the corresponding riders objects in the list that is in the portal using the riderID that is given when adding rider results in stage 
@@ -45,5 +48,48 @@ fullfils the following:
 - get a list of mountain points, sorted by finish time (elapsed time). within stage
 - remove stage results from a rider. (from both the rider and stage end and segments)
 
+
 - register rider results in stage. 
 
+
+
+
+
+- get riders overall points for a given race, sum of their points in all the stages, sorted by elapsed time
+
+Race Class:
+
+
+ArrayList<Rider> ridersThatCompeted = new ArrayList<>;
+
+
+
+
+list of rider objects = [___]   //sort by elapsed time. add riders when 'register rider resu;lts'. 
+                                //find the corresponding riders objects in the list that is in the portal using the riderID that is given when adding rider results in stage 
+
+
+list, rider ranks = riderIDs sorted by adjusted elapsed time in each stage.         //just pull the desired '//tempStageResults' out of each rider in the rider object list
+list of adjustedtime = []
+list of sprintspoints = []
+list mountainpoints = [ , ,  , , , ]
+list of riders points [] = 
+
+
+
+
+look at this race,
+
+go to through its list of stage objects (where it stores all results)
+
+rider 1,4,6,1
+
+elapsed time : 1,2,3,5
+
+adjusted elapsed time: 1, 1, 1, 5
+
+sprint points: 1,4,2,6
+
+mountain points: 2, 3, 1, 3
+
+tot points: 3, 7, 3, 9
