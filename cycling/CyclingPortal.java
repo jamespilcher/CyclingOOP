@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * CyclingPortal is an implementor of the CyclingPortalInterface interface.
@@ -16,6 +18,22 @@ import java.util.Collections;
  *
  */
 public class CyclingPortal implements CyclingPortalInterface {
+
+	//points awarded depending on position in segment
+	private ArrayList<Integer>sprintSegmentPoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
+	private ArrayList<Integer>hcSegmentPoints = new ArrayList<Integer>(Arrays.asList(20,15,12,10,8,6,4,2));
+	private ArrayList<Integer>c1SegmentPoints = new ArrayList<Integer>(Arrays.asList(10,8,6,4,2,1));
+	private ArrayList<Integer>c2SegmentPoints = new ArrayList<Integer>(Arrays.asList(5,3,2,1));
+	private ArrayList<Integer>c3SegmentPoints = new ArrayList<Integer>(Arrays.asList(2,1));
+	private ArrayList<Integer>c4SegmentPoints = new ArrayList<Integer>(Arrays.asList(1));
+
+	//points awarded depending on position in stage
+
+	private ArrayList<Integer>flatStagePoints = new ArrayList<Integer>(Arrays.asList(50,30,20,18,16,14,12,10,8,7,6,5,4,3,2));
+	private ArrayList<Integer>mediumMountainStagePoints = new ArrayList<Integer>(Arrays.asList(30,25,22,19,17,15,13,11,9,7,6,5,4,3,2));
+	private ArrayList<Integer>highMountainStagePoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
+	private ArrayList<Integer>timeTrialStagePoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
+
 
 	//list of riders
     private ArrayList<Rider> riderList=new ArrayList<Rider>();
@@ -35,7 +53,6 @@ public class CyclingPortal implements CyclingPortalInterface {
     private ArrayList<Race> raceList=new ArrayList<Race>();
 	public ArrayList<Race> getRaceList() {return raceList;}
 
-	
     private <T extends IdHaver> T correspondingObjectFinder(int id, ArrayList<T> objectList){
         T correspondingObject = null;
         for (T object : objectList) {
@@ -87,7 +104,151 @@ public class CyclingPortal implements CyclingPortalInterface {
 		segment = null;
 		}
 
+	private void sortRidersByElapsedTime(ArrayList<RiderStageResults> competingRiders){
+		competingRiders.sort(Comparator.comparing( (RiderStageResults rider) -> rider.getElapsedTimeForStage()));
+	}
+	
+	private void adjustRiderTimesInStage(ArrayList<RiderStageResults> competingRiders){
+		sortRidersByElapsedTime(competingRiders);
+		competingRiders.get(0).setAdjustedTimeForStage(competingRiders.get(0).getElapsedTimeForStage()); //rider[0].adjustedtime = elapsed time
+		for (int i = 0; i < competingRiders.size()-1; i++){
+			if (competingRiders.get(i+1).getElapsedTimeForStage() - competingRiders.get(i).getElapsedTimeForStage() < 1L){
+				competingRiders.get(i+1).setAdjustedTimeForStage(competingRiders.get(i).getAdjustedTimeForStage());
+			} else{
+				competingRiders.get(i+1).setAdjustedTimeForStage(competingRiders.get(i+1).getElapsedTimeForStage());
+			}
+		}
+	}
 
+
+	private ArrayList<Integer> pointsToBeAddedFormatter(int numRiders, ArrayList<Integer> rankPoints){
+		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
+		pointsToBeAdded.addAll(rankPoints);
+		if (numRiders > rankPoints.size()){
+			int sizeDifference = numRiders - rankPoints.size();
+			for (int i = 0; i < sizeDifference; i++)
+				pointsToBeAdded.add(0);
+		}
+		return pointsToBeAdded;
+	}
+
+	private void awardSegmentPoints(ArrayList<RiderStageResults> competingRiders, Segment segment, ArrayList<Segment> stageSegments, ArrayList<Integer> segmentPointsToBeAdded, boolean isASprintSegment){
+		int indexForSegment = stageSegments.indexOf(segment);
+
+		ArrayList<RiderStageResults> ridersInSegment = new ArrayList<RiderStageResults>(competingRiders);
+		ridersInSegment.sort(Comparator.comparing( (RiderStageResults rider) -> rider.getSegmentTime(indexForSegment)));
+
+		for (RiderStageResults rider : ridersInSegment) {
+			int indexForPoints = ridersInSegment.indexOf(rider);
+			int points = segmentPointsToBeAdded.get(indexForPoints);
+			if (isASprintSegment){
+				rider.addPoints(points);
+			}
+			else{
+				rider.addMountainPoints(points);
+			}
+		return;
+		}
+	}
+
+
+	void removeStagePointsFromRiders(Stage stage){
+
+	}
+
+	
+
+	void awardPointsInStage(Stage stage){
+		ArrayList<RiderStageResults> riders = new ArrayList<RiderStageResults>(stage.getRidersInStage());
+		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
+		sortRidersByElapsedTime(riders);
+		if (stage.getType() == StageType.FLAT){
+			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), flatStagePoints);
+		}
+		else if (stage.getType() == StageType.MEDIUM_MOUNTAIN){
+			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), mediumMountainStagePoints);
+		}
+		else if (stage.getType() == StageType.HIGH_MOUNTAIN){
+			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), highMountainStagePoints);
+		}
+		else if (stage.getType() == StageType.TT){
+			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), timeTrialStagePoints);
+		}
+		for (RiderStageResults rider : riders){
+			int indexForPoints = riders.indexOf(rider);
+			int points = pointsToBeAdded.get(indexForPoints);
+			rider.addPoints(points);
+		ArrayList<Segment> segments = new ArrayList<Segment>(stage.getSegments());
+		ArrayList<Integer> segmentPointsToBeAdded = new ArrayList<Integer>(sprintSegmentPoints);
+		for (Segment segment : segments){
+			if (segment.getSegmentType() == SegmentType.SPRINT){
+				segmentPointsToBeAdded = pointsToBeAddedFormatter(riders.size(), sprintSegmentPoints);
+				awardSegmentPoints(riders, segment, segments, segmentPointsToBeAdded, true);
+			}
+		}
+		return;
+		}			
+
+	}
+
+	void awardMountainPointsInStage(Stage stage){
+		ArrayList<RiderStageResults> riders = new ArrayList<RiderStageResults>(stage.getRidersInStage());
+		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
+		sortRidersByElapsedTime(riders);
+
+		ArrayList<Segment> segments = new ArrayList<Segment>(stage.getSegments());
+
+		for (Segment segment : segments){
+			SegmentType segmentType = segment.getSegmentType();
+			if (!(segmentType == SegmentType.SPRINT)){
+				if (segmentType == SegmentType.C1){
+					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c1SegmentPoints);
+				}
+				else if (segmentType == SegmentType.C2){
+					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c2SegmentPoints);
+				}
+				else if (segmentType == SegmentType.C3){
+					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c3SegmentPoints);
+				}
+				else if (segmentType == SegmentType.C4){
+					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c4SegmentPoints);
+				}
+				else if (segmentType == SegmentType.HC){
+					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), hcSegmentPoints);
+				}
+				awardSegmentPoints(riders, segment, segments, pointsToBeAdded, false);
+			}
+		}
+
+
+	}
+
+	void awardARidersPointsInRace(Rider rider, Race race){
+		//CHECK IF RIDER IS IN RACE?? - maybe do this before
+
+		//for stage in race,
+		//award points in stage
+		//int riderMountainPoints = 0;
+
+		//for riderStageResults in rider.getriderResultsStage
+			//if riderStageRestults.getRaceId == race.getId(),
+				//riderPoints += riderStageResults.getRiderPoints()
+		//rider.setTotalPoints(riderPoints)
+	}
+
+	void awardARidersMountainPointsInRace(Rider rider, Race race){
+		//for stage in race,
+		//award Mountainpoints in stage
+		//int riderPoints = 0;
+
+		//for riderStageResults in rider.getriderResultsStage
+			//if raceId == race.getId(),
+				//riderMountainPoints += riderStageResults.getRiderMountainPoints()
+		//rider.setTotalMountainPoints(riderMountainPoints)
+	}
+
+	
+	
 	@Override
 	public int[] getRaceIds() {
 		/**
@@ -668,6 +829,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *                                     results". Results can only be added to a
 	 *                                     stage while it is "waiting for results".
 	 */
+
+
+
+
+	Rider rider = correspondingObjectFinder(riderId, riderList);
+	//if (stage == null){
+	//	throw
+	//}
+
+	Stage stage = correspondingObjectFinder(stageId, stageList);
+	//if (stage == null){
+	//	throw
+	//}
+
+	int raceId = stage.getRaceID();
+	RiderStageResults riderResults = new RiderStageResults(riderId, stageId, raceId, checkpoints);
+	stage.addRiderToStage(riderResults);
+
+	rider.addStageResults(riderResults);
+
 	}
 
 	@Override
@@ -744,7 +925,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *         there is no result for the stage.
 	 * @throws IDNotRecognisedException If the ID does not match any stage in the
 	 *                                  system.
-	 */		return null;
+	 */		
+	
+	return null;
 	}
 
 	@Override
@@ -883,7 +1066,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *         returned by {@link #getRidersGeneralClassificationRank(int)}.
 	 * @throws IDNotRecognisedException If the ID does not match any race in the
 	 *                                  system.
-	 */		return null;
+	 */		
+	 //A loop through list of stages in the race. 
+		 //Btake the rider id, find it as a rider object, remember its index
+		 // should probably make a list of rider objects.
+		 //Cget the adjusted elapsed time for the rider using the same index, sum the elapsed times in the total elapsed time attribute.
+		 //D sort riders by their total elapsed time.
+		 //abcd should be its own function
+		 //turn that into a list of rider times. :)
+	
+	 return null;
 	}
 
 	@Override
@@ -902,7 +1094,15 @@ public class CyclingPortal implements CyclingPortalInterface {
          *         match the riders returned by {@link #getRidersGeneralClassificationRank(int)}.
          * @throws IDNotRecognisedException If the ID does not match any race in the
          *                                  system.
-         */		return null;
+         */
+			//Aloop through list of stages in the race. 
+		 //Btake the rider ids, find it as a rider object, remember the index
+		 //Cin the stage object, get the points results for that rider using the same index, sum the points attribute in the rider class.
+		 //sort riders by their elapsed time.
+		 //abc own functino
+		 //turn that into a list of their points. :)
+		
+		 return null;
 	}
 
 	@Override
@@ -922,7 +1122,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *         {@link #getRidersGeneralClassificationRank(int)}.
 	 * @throws IDNotRecognisedException If the ID does not match any race in the
 	 *                                  system.
-	 */		return null;
+	 */		
+			//Aloop through list of stages in the race. 
+		 //Btake the first rider id in the stage, find it as a rider object
+		 //Cget the mountain results for that stage using the same index, sum the mountainpoints attribute in the rider class.
+		 //sort riders by their total elapsed time.
+		 //abc own function
+		 //turn that into a list of mountainpoints (sorted by time). :)
+
+	
+	 return null;
 	}
 
 	@Override
@@ -941,6 +1150,13 @@ public class CyclingPortal implements CyclingPortalInterface {
          * @throws IDNotRecognisedException If the ID does not match any race in the
          *                                  system.
          */		
+
+		 //A loop through list of stages in the race. 
+		 //Btake the rider id, find it as a rider object, remember its index
+		 //Cget the adjusted elapsed time for the rider using the same index, sum the elapsed times in the total elapsed time attribute.
+		 //sort riders by their total elapsed time.
+		 //abc should be its own function
+		 //turn that into a list of their IDs. :)
         return null;
 	}
 
@@ -959,7 +1175,15 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *         stage in the race.
 	 * @throws IDNotRecognisedException If the ID does not match any race in the
 	 *                                  system.
-	 */		return null;
+	 */
+
+		//Aloop through list of stages in the race. 
+		 //Btake the rider ids, find it as a rider object, remember the index
+		 //Cin the stage object, get the points results for that rider using the same index, sum the points attribute in the rider class.
+		 //Dsort riders by their total points.
+		 //abcd own functino
+		 //turn that into a list of their IDs. :)
+	 return null;
 	}
 
 	@Override
@@ -977,7 +1201,16 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 *         for any stage in the race.
 	 * @throws IDNotRecognisedException If the ID does not match any race in the
 	 *                                  system.
-	 */		return null;
+	 */		
+	
+		//loop through list of stages in the race. 
+		 //take the first rider id in the stage, find it as a rider object
+		 //get the mountain results for that stage using the same index, sum the mountainpoints attribute in the rider class.
+		 //sort riders by their total mountainpoints.
+		 //turn that into a list of their IDs. :)
+
+	
+	 return null;
 	}
 
 }
