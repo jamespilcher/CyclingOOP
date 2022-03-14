@@ -13,6 +13,9 @@ class Stage extends IdHaver{
 
     ArrayList<Segment> segments = new ArrayList<Segment>();
 
+
+    ArrayList<RiderStageResults> ridersInStage = new ArrayList<RiderStageResults>();
+
     private static int numberOfStages = 0;
 
 
@@ -29,6 +32,10 @@ class Stage extends IdHaver{
         stageState = "in preparation";
         super.setId(id);
 
+    }
+
+    public void addRiderToStage(RiderStageResults rider){
+        ridersInStage.add(rider);
     }
 
     public void addSegment(Segment segment){
@@ -58,6 +65,7 @@ class Stage extends IdHaver{
     public double getLength() {return length;}
     public LocalDateTime getStartTime() { return startTime; }
     public String getStageState() { return stageState; }
+    public ArrayList<RiderStageResults> getRidersInStage(){ return ridersInStage; }
 
     public void setStageState(String stageState){
         this.stageState = stageState;
