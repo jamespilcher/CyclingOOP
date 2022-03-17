@@ -1,7 +1,8 @@
 package cycling;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-class Stage extends IdHaver{
+public class Stage extends IdHaver implements Serializable{
     private int id;
     private int raceID; //parent race id
     private StageType type;
