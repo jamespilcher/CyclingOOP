@@ -1,6 +1,7 @@
 package cycling;
+import java.io.Serializable;
 import java.util.ArrayList;
-class Race extends IdHaver{
+public class Race extends IdHaver implements Serializable {
     private int id;
     private String name;
     private String description;
