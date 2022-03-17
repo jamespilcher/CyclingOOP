@@ -1,11 +1,10 @@
 package cycling;
+import java.io.Serializable;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
-
-
-public class RiderStageResults {
+public class RiderStageResults implements Serializable{
     private int id; //riderId
     private int stageId;
     private int raceId;
