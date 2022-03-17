@@ -1,9 +1,10 @@
 package cycling;
 
+import java.io.Serializable;
 
 //abstract class then override
 //time, length, 
-public class Segment extends IdHaver{
+public class Segment extends IdHaver implements Serializable {
     private int id;
     private int stageID;
     private Double location;
