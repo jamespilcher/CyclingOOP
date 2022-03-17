@@ -52,6 +52,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 	//list of races
     private ArrayList<Race> raceList=new ArrayList<Race>();
 	public ArrayList<Race> getRaceList() {return raceList;}
+	
+	private ArrayList<RiderStageResults> riderStageResultsList=new ArrayList<RiderStageResults>();
+	public ArrayList<RiderStageResults> getriderStageResultsList() {return riderStageResultsList;}
 
     private <T extends IdHaver> T correspondingObjectFinder(int id, ArrayList<T> objectList){
         T correspondingObject = null;
@@ -848,6 +851,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 	stage.addRiderToStage(riderResults);
 
 	rider.addStageResults(riderResults);
+	riderStageResultsList.add(riderResults);
+
 
 	}
 
@@ -991,6 +996,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * Method empties this MiniCyclingPortalInterface of its contents and resets all
 	 * internal counters.
 	 */
+		riderList.clear();
+		teamList.clear();
+		raceList.clear();
+		stageList.clear();
+		segmentList.clear();
+		riderStageResultsList.clear();
 	}
 
 	@Override
@@ -1006,6 +1017,23 @@ public class CyclingPortal implements CyclingPortalInterface {
          * @throws IOException If there is a problem experienced when trying to save the
          *                     store contents to the file.
          */
+		if (!filename.endsWith(".ser")){
+			filename+= ".ser";
+		}
+		File file = new File(filename);
+		if (file.exists() && !file.isDirectory()){
+			file.delete();
+		}
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))){
+            oos.writeObject(riderList);
+            oos.writeObject(teamList);
+            oos.writeObject(raceList);
+            oos.writeObject(stageList);
+            oos.writeObject(segmentList);
+            oos.writeObject(riderStageResultsList);
+            System.out.printf("Saved in %s%n",filename);
+			oos.close();
+        }
 	}
 
 	@Override
@@ -1023,6 +1051,49 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 * @throws ClassNotFoundException If required class files cannot be found when
 	 *                                loading.
 	 */
+	eraseCyclingPortal();
+	if (!filename.endsWith(".ser")){
+		filename+= ".ser";
+	}
+	try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))){
+		Object obj=ois.readObject();
+		if (obj instanceof ArrayList<?>){
+			if(((ArrayList<?>)obj).get(0) instanceof Rider)
+			{
+				riderList=(ArrayList<Rider>)obj;
+			}		
+		}
+		obj=ois.readObject();
+		if (obj instanceof ArrayList<?>){
+			if(((ArrayList<?>)obj).get(0) instanceof Team){
+				teamList=(ArrayList<Team>)obj;
+			}
+		}
+		obj=ois.readObject();
+		if (obj instanceof ArrayList<?>){
+			if(((ArrayList<?>)obj).get(0) instanceof Race){
+				raceList=(ArrayList<Race>)obj;
+			}
+		}
+		obj=ois.readObject();
+		if (obj instanceof ArrayList<?>){
+			if(((ArrayList<?>)obj).get(0) instanceof Stage){
+				stageList=(ArrayList<Stage>)obj;
+			}
+		}
+		obj=ois.readObject();
+		if (obj instanceof ArrayList<?>){
+			if(((ArrayList<?>)obj).get(0) instanceof Segment){
+				segmentList=(ArrayList<Segment>)obj;
+			}
+		}
+		obj=ois.readObject();
+		if (obj instanceof ArrayList<?>){
+			if(((ArrayList<?>)obj).get(0) instanceof RiderStageResults){
+				riderStageResultsList=(ArrayList<RiderStageResults>)obj;
+			}
+		}
+	}
 	}
 
 	@Override
