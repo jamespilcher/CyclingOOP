@@ -1,6 +1,6 @@
 package cycling;
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
 public class Team extends IdHaver implements Serializable{
 
     private int id;
@@ -26,7 +26,7 @@ public class Team extends IdHaver implements Serializable{
         riders.remove(rider);
     }
 
-    //not needed now?
+    //not needed now
     public void deleteRiders(){
         riders.clear();
     }
