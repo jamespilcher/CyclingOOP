@@ -1,6 +1,11 @@
 package cycling;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -19,7 +24,7 @@ import java.util.Comparator;
  */
 public class CyclingPortal implements CyclingPortalInterface {
 
-	//points awarded depending on position in segment
+	//CONSTANTS
 	private ArrayList<Integer>sprintSegmentPoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
 	private ArrayList<Integer>hcSegmentPoints = new ArrayList<Integer>(Arrays.asList(20,15,12,10,8,6,4,2));
 	private ArrayList<Integer>c1SegmentPoints = new ArrayList<Integer>(Arrays.asList(10,8,6,4,2,1));
@@ -52,9 +57,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 	//list of races
     private ArrayList<Race> raceList=new ArrayList<Race>();
 	public ArrayList<Race> getRaceList() {return raceList;}
-	
+
 	private ArrayList<RiderStageResults> riderStageResultsList=new ArrayList<RiderStageResults>();
-	public ArrayList<RiderStageResults> getriderStageResultsList() {return riderStageResultsList;}
+
 
     private <T extends IdHaver> T correspondingObjectFinder(int id, ArrayList<T> objectList){
         T correspondingObject = null;
@@ -67,6 +72,26 @@ public class CyclingPortal implements CyclingPortalInterface {
         return correspondingObject;
     }
 
+	void deleteAllRiderResults(Rider rider){
+		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(rider.getRiderResultsList());
+		for (RiderStageResults riderStageResults : riderResultsList){
+			deleteRiderResult(riderStageResults);
+		}
+	}
+
+	void deleteRiderResult(RiderStageResults riderStageResults){
+		riderStageResults.getStage().getRiderResultsList().remove(riderStageResults);
+		riderStageResults.getRider().getRiderResultsList().remove(riderStageResults);
+		riderStageResultsList.remove(riderStageResults);
+	}
+
+	void deleteAllStageResults(Stage stage){
+		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
+		for (RiderStageResults riderStageResults : riderResultsList){
+			deleteRiderResult(riderStageResults);
+		}
+	}
+
 	private void deleteTeam(Team team){
 		teamList.remove(team.getId());
 		ArrayList<Rider>riders = new ArrayList<Rider>(team.getRiders());
@@ -77,10 +102,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	private void deleteRider(Rider rider, Team team){
-		riderList.remove(rider.getId());
+		riderList.remove(rider);
+
+		deleteAllRiderResults(rider);
+
 		team.removeRider(rider);
-		//remove rider's Results
-		rider = null;
 	}
 
 	private void deleteRace(Race race){
@@ -98,6 +124,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		for (Segment segment : stageSegments) {
 			deleteSegment(segment, stage);
 		}
+		deleteAllStageResults(stage);
 		stage = null;
 	}
 
@@ -107,15 +134,20 @@ public class CyclingPortal implements CyclingPortalInterface {
 		segment = null;
 		}
 
+		
 	private void sortRidersByElapsedTime(ArrayList<RiderStageResults> competingRiders){
 		competingRiders.sort(Comparator.comparing( (RiderStageResults rider) -> rider.getElapsedTimeForStage()));
+
 	}
 	
 	private void adjustRiderTimesInStage(ArrayList<RiderStageResults> competingRiders){
+
 		sortRidersByElapsedTime(competingRiders);
+
 		competingRiders.get(0).setAdjustedTimeForStage(competingRiders.get(0).getElapsedTimeForStage()); //rider[0].adjustedtime = elapsed time
+
 		for (int i = 0; i < competingRiders.size()-1; i++){
-			if (competingRiders.get(i+1).getElapsedTimeForStage() - competingRiders.get(i).getElapsedTimeForStage() < 1L){
+			if (competingRiders.get(i+1).getElapsedTimeForStage() - competingRiders.get(i).getElapsedTimeForStage() < 1000_000_000L){
 				competingRiders.get(i+1).setAdjustedTimeForStage(competingRiders.get(i).getAdjustedTimeForStage());
 			} else{
 				competingRiders.get(i+1).setAdjustedTimeForStage(competingRiders.get(i+1).getElapsedTimeForStage());
@@ -146,58 +178,65 @@ public class CyclingPortal implements CyclingPortalInterface {
 			int points = segmentPointsToBeAdded.get(indexForPoints);
 			if (isASprintSegment){
 				rider.addPoints(points);
+
 			}
 			else{
 				rider.addMountainPoints(points);
+				//System.out.println("rider = " + rider.getRider().getId());
+				//System.out.println("points = " + points);
 			}
-		return;
 		}
+		return;
 	}
 
 
-	void removeStagePointsFromRiders(Stage stage){
 
-	}
 
-	
 
 	void awardPointsInStage(Stage stage){
-		ArrayList<RiderStageResults> riders = new ArrayList<RiderStageResults>(stage.getRidersInStage());
+		//zero out the points - segment included!
+		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
+
 		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
-		sortRidersByElapsedTime(riders);
+		sortRidersByElapsedTime(riderResultsList);
 		if (stage.getType() == StageType.FLAT){
-			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), flatStagePoints);
+			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), flatStagePoints);
 		}
 		else if (stage.getType() == StageType.MEDIUM_MOUNTAIN){
-			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), mediumMountainStagePoints);
+			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), mediumMountainStagePoints);
 		}
 		else if (stage.getType() == StageType.HIGH_MOUNTAIN){
-			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), highMountainStagePoints);
+			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), highMountainStagePoints);
 		}
 		else if (stage.getType() == StageType.TT){
-			pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), timeTrialStagePoints);
+			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), timeTrialStagePoints);
 		}
-		for (RiderStageResults rider : riders){
-			int indexForPoints = riders.indexOf(rider);
+		for (RiderStageResults riderStageResults : riderResultsList){
+			int indexForPoints = riderResultsList.indexOf(riderStageResults);
+
 			int points = pointsToBeAdded.get(indexForPoints);
-			rider.addPoints(points);
+			riderStageResults.setPoints(points);
+		}
 		ArrayList<Segment> segments = new ArrayList<Segment>(stage.getSegments());
 		ArrayList<Integer> segmentPointsToBeAdded = new ArrayList<Integer>(sprintSegmentPoints);
 		for (Segment segment : segments){
 			if (segment.getSegmentType() == SegmentType.SPRINT){
-				segmentPointsToBeAdded = pointsToBeAddedFormatter(riders.size(), sprintSegmentPoints);
-				awardSegmentPoints(riders, segment, segments, segmentPointsToBeAdded, true);
+				segmentPointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), sprintSegmentPoints);
+				awardSegmentPoints(riderResultsList, segment, segments, segmentPointsToBeAdded, true);
 			}
 		}
 		return;
 		}			
 
-	}
 
 	void awardMountainPointsInStage(Stage stage){
-		ArrayList<RiderStageResults> riders = new ArrayList<RiderStageResults>(stage.getRidersInStage());
+		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
 		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
-		sortRidersByElapsedTime(riders);
+		sortRidersByElapsedTime(riderResultsList);
+
+		for (RiderStageResults riderStageResults : riderResultsList){
+			riderStageResults.setMountainPoints(0);
+		}
 
 		ArrayList<Segment> segments = new ArrayList<Segment>(stage.getSegments());
 
@@ -205,60 +244,116 @@ public class CyclingPortal implements CyclingPortalInterface {
 			SegmentType segmentType = segment.getSegmentType();
 			if (!(segmentType == SegmentType.SPRINT)){
 				if (segmentType == SegmentType.C1){
-					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c1SegmentPoints);
+					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c1SegmentPoints);
 				}
 				else if (segmentType == SegmentType.C2){
-					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c2SegmentPoints);
+					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c2SegmentPoints);
 				}
 				else if (segmentType == SegmentType.C3){
-					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c3SegmentPoints);
+					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c3SegmentPoints);
 				}
 				else if (segmentType == SegmentType.C4){
-					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), c4SegmentPoints);
+					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c4SegmentPoints);
 				}
 				else if (segmentType == SegmentType.HC){
-					pointsToBeAdded = pointsToBeAddedFormatter(riders.size(), hcSegmentPoints);
+					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), hcSegmentPoints);
 				}
-				awardSegmentPoints(riders, segment, segments, pointsToBeAdded, false);
+				awardSegmentPoints(riderResultsList, segment, segments, pointsToBeAdded, false);
 			}
 		}
-
-
 	}
 
-	void awardARidersPointsInRace(Rider rider, Race race){
-		//CHECK IF RIDER IS IN RACE?? - maybe do this before
-
-		//for stage in race,
-		//award points in stage
-		//int riderMountainPoints = 0;
-
-		//for riderStageResults in rider.getriderResultsStage
-			//if riderStageRestults.getRaceId == race.getId(),
-				//riderPoints += riderStageResults.getRiderPoints()
-		//rider.setTotalPoints(riderPoints)
-	}
-
-	void awardARidersMountainPointsInRace(Rider rider, Race race){
-		//for stage in race,
-		//award Mountainpoints in stage
-		//int riderPoints = 0;
-
-		//for riderStageResults in rider.getriderResultsStage
-			//if raceId == race.getId(),
-				//riderMountainPoints += riderStageResults.getRiderMountainPoints()
-		//rider.setTotalMountainPoints(riderMountainPoints)
-	}
 
 	
+
+
+
+	private ArrayList<Rider> totalRidersPoints(Race race){
+
+		//maybe store riders just in race instead? this is inneficient.
+		ArrayList<Rider> riders = new ArrayList<Rider>();
+		for (Rider allRider : riderList){
+			allRider.setTotalElapsedTime(0L);
+			allRider.setTotalPoints(0);
+		}
+
+		for (Stage stage : race.getStages()){
+			awardPointsInStage(stage);
+			for (RiderStageResults riderStageResults : stage.getRiderResultsList()){
+				Rider rider = riderStageResults.getRider();
+				rider.addTotalElapsedTime(riderStageResults.getElapsedTimeForStage());   //note doesnt 0 out the points.
+				rider.addTotalPoints(riderStageResults.getRiderPoints());
+				if (!riders.contains(rider)){
+					riders.add(rider);
+				}
+			}
+		}
+		return riders;
+	}
+
+	private ArrayList<Rider> totalRidersMountainPoints(Race race){
+
+		//maybe store riders just in race instead? this is inneficient.
+		ArrayList<Rider> riders = new ArrayList<Rider>();
+		for (Rider allRider : riderList){
+			allRider.setTotalElapsedTime(0L);
+			allRider.setTotalMountainPoints(0);
+		}
+		for (Stage stage : race.getStages()){
+			awardMountainPointsInStage(stage);
+			for (RiderStageResults riderStageResults : stage.getRiderResultsList()){
+				Rider rider = riderStageResults.getRider();
+				//System.out.println("Rider" + riderStageResults.getRider().getId());
+				//System.out.println("Points to be added " + riderStageResults.getRiderMountainPoints());
+				rider.addTotalElapsedTime(riderStageResults.getElapsedTimeForStage());   //note doesnt 0 out the points.
+				rider.addTotalMountainPoints(riderStageResults.getRiderMountainPoints()); //adding tot mountain points twice
+				//System.out.println("rider total mountain points" + rider.getTotalMountainPoints());
+				if (!riders.contains(rider)){
+					riders.add(rider);
+				}
+			}
+
+		}
+		return riders;
+	}
+
+
+	private void sortByTotalElapsedTime(ArrayList<Rider> riders){
+		riders.sort(Comparator.comparing( (Rider rider) -> rider.getTotalElapsedTime()));
+	}
+
+	private void sortByTotalAdjustedTime(ArrayList<Rider> riders){
+		riders.sort(Comparator.comparing( (Rider rider) -> rider.getTotalAdjustedTime()));
+	}
+
+
+	private ArrayList<Rider> ridersTotalAdjustedTime(Race race){
+
+		//maybe store riders just in race instead? this is inneficient.
+		ArrayList<Rider> riders = new ArrayList<Rider>();
+		for (Rider allRider : riderList){
+			allRider.setTotalAdjustedTime(0L);
+		}
+		for (Stage stage : race.getStages()){
+			ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
+			if (riderResultsList.size() == 0){
+				break;
+			}
+			adjustRiderTimesInStage(riderResultsList);
+			for (RiderStageResults riderStageResults : riderResultsList){
+				Rider rider = riderStageResults.getRider();
+				rider.addTotalAdjustedTime(riderStageResults.getAdjustedTimeForStage());   //note doesnt 0 out the points.
+				if (!riders.contains(rider)){
+					riders.add(rider);
+				}
+			}
+		}
+		sortByTotalAdjustedTime(riders);
+		return riders;
+	}
 	
 	@Override
 	public int[] getRaceIds() {
-		/**
-		 * Get the races currently created in the platform.
-		 * 
-		 * @return An array of race IDs in the system or an empty array if none exists.
-		 */
 			List<Integer> raceIds = new ArrayList<Integer>();
 			for (Race race: raceList) {
 				raceIds.add(race.getId());
@@ -266,25 +361,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 			return raceIds.stream().mapToInt(i -> i).toArray();
 		}
 	
-
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
-        /**
-         * The method creates a staged race in the platform with the given name and
-         * description.
-         * <p>
-         * The state of this MiniCyclingPortalInterface must be unchanged if any
-         * exceptions are thrown.
-         * 
-         * @param name        Race's name.
-         * @param description Race's description (can be null).
-         * @throws IllegalNameException If the name already exists in the platform.
-         * @throws InvalidNameException If the name is null, empty, has more than 30
-         *                              characters, or has white spaces.
-         * @return the unique ID of the created race.
-         * 
-         */        
-
         if ( (name == null) || name == "" || name.length() > 30 || name.contains(" ")){
             throw new InvalidNameException("Race name is null, empty, has more than 30 chars, or has whitespaces");
         }  
@@ -301,101 +379,42 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public String viewRaceDetails(int raceId) throws IDNotRecognisedException {
-	/**
-	 * Get the details from a race.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race being queried.
-	 * @return Any formatted string containing the race ID, name, description, the
-	 *         number of stages, and the total length (i.e., the sum of all stages'
-	 *         length).
-	 * @throws IDNotRecognisedException If the ID does not match to any race in the
-	 *                                  system.
-	 */		
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The Race ID does not match to any race in the system.");
+		}
+		String details;
+		String name = race.getName();
+		String description = race.getDescription();
+		Integer numberOfStages = race.getStages().size();
+		Double totalLength = race.totalLength();
 
-	 // generic idmatch function
-	 Race race = correspondingObjectFinder(raceId, raceList);
-	 if (race == null){
-		 throw new IDNotRecognisedException("The Race ID does not match to any race in the system.");
-	 }
-	 String details;
-	 String name = race.getName();
-	 String description = race.getDescription();
-	 Integer numberOfStages = race.getStages().size();
-	 Double totalLength = race.totalLength();
-
-	 details = String.format("Race ID: %s, Race Name: %s, Race Description: %s, Number of Stages: %s, Total Race Length: %s", raceId, name, description, numberOfStages, totalLength);
-	 return details;
+		details = String.format("Race ID: %s, Race Name: %s, Race Description: %s, Number of Stages: %s, Total Race Length: %s", raceId, name, description, numberOfStages, totalLength);
+		return details;
 	}
 
 	@Override
 	public void removeRaceById(int raceId) throws IDNotRecognisedException {
-	/**
-	 * The method removes the race and all its related information, i.e., stages,
-	 * segments, and results.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race to be removed.
-	 * @throws IDNotRecognisedException If the ID does not match to any race in the
-	 *                                  system.
-	 */
-	Race race = correspondingObjectFinder(raceId, raceList);
-	if (race == null){
-		throw new IDNotRecognisedException("The given Race ID does not match to any race in the system");
-	}
-	deleteRace(race);
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The given Race ID does not match to any race in the system");
+		}
+		deleteRace(race);
 	}
 
 	@Override
 	public int getNumberOfStages(int raceId) throws IDNotRecognisedException {
-		/**
-		 * The method queries the number of stages created for a race.
-		 * <p>
-		 * The state of this MiniCyclingPortalInterface must be unchanged if any
-		 * exceptions are thrown.
-		 * 
-		 * @param raceId The ID of the race being queried.
-		 * @return The number of stages created for the race.
-		 * @throws IDNotRecognisedException If the ID does not match to any race in the
-		 *                                  system.
-		 */
-			Race race = correspondingObjectFinder(raceId, raceList);
-			if (race == null) {
-				throw new IDNotRecognisedException("Race Id not recognised");
-			}
-			return race.getStages().size();
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null) {
+			throw new IDNotRecognisedException("Race Id not recognised");
+		}
+		return race.getStages().size();
 		}
 
 	@Override
 	public int addStageToRace(int raceId, String stageName, String description, double length, LocalDateTime startTime,
 			StageType type)
 			throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
-        /**
-         * Creates a new stage and adds it to the race.
-         * <p>
-         * The state of this MiniCyclingPortalInterface must be unchanged if any
-         * exceptions are thrown.
-         * 
-         * @param raceId      The race which the stage will be added to.
-         * @param stageName   An identifier name for the stage.
-         * @param description A descriptive text for the stage.
-         * @param length      Stage length in kilometres.
-         * @param startTime   The date and time in which the stage will be raced. It
-         *                    cannot be null.
-         * @param type        The type of the stage. This is used to determine the
-         *                    amount of points given to the winner.
-         * @return the unique ID of the stage.
-         * @throws IDNotRecognisedException If the ID does not match to any race in the
-         *                                  system.
-         * @throws IllegalNameException     If the name already exists in the platform.
-         * @throws InvalidNameException     If the name is null, empty, has more than 30
-         *                              	characters, or has white spaces.
-         * @throws InvalidLengthException   If the length is less than 5km.
-         */	
         //ADD TO RACE OBJECTS LIST.
 
         if ( (stageName == null) || stageName == "" || stageName.length() > 30 || stageName.contains(" ")){
@@ -421,44 +440,19 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
-
-	/**
-	 * Retrieves the list of stage IDs of a race.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race being queried.
-	 * @return An array of stage IDs ordered (from first to last) by their sequence in the
-	 *         race or an empty array if none exists.
-	 * @throws IDNotRecognisedException If the ID does not match to any race in the
-	 *                                  system.
-	 */
-
-	Race race = correspondingObjectFinder(raceId, raceList);
-	if (race == null){
-		throw new IDNotRecognisedException("The race ID is not recognised in the system");
-	}
-	List<Integer> stageIds = new ArrayList<Integer>();
-	for (Stage stage : race.getStages()) {
-		stageIds.add(stage.getId());
-	}
-	return stageIds.stream().mapToInt(i->i).toArray();
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The race ID is not recognised in the system");
+		}
+		List<Integer> stageIds = new ArrayList<Integer>();
+		for (Stage stage : race.getStages()) {
+			stageIds.add(stage.getId());
+		}
+		return stageIds.stream().mapToInt(i->i).toArray(); // could just make an arrayofsize[race.getStages().size]
 	}
 
 	@Override
 	public double getStageLength(int stageId) throws IDNotRecognisedException {
-		/**
-		 * Gets the length of a stage in a race, in kilometres.
-		 * <p>
-		 * The state of this MiniCyclingPortalInterface must be unchanged if any
-		 * exceptions are thrown.
-		 * 
-		 * @param stageId The ID of the stage being queried.
-		 * @return The stage's length.
-		 * @throws IDNotRecognisedException If the ID does not match to any stage in the
-		 *                                  system.
-		 */
 		Stage stage = correspondingObjectFinder(stageId, stageList);
 		if (stage == null){
 			throw new IDNotRecognisedException("Stage ID not recognized");
@@ -469,16 +463,6 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public void removeStageById(int stageId) throws IDNotRecognisedException {
-		/**
-		 * Removes a stage and all its related data, i.e., segments and results.
-		 * <p>
-		 * The state of this MiniCyclingPortalInterface must be unchanged if any
-		 * exceptions are thrown.
-		 * 
-		 * @param stageId The ID of the stage being removed.
-		 * @throws IDNotRecognisedException If the ID does not match to any stage in the
-		 *                                  system.
-		 */
 		Stage stage = correspondingObjectFinder(stageId, stageList);
 		if (stage == null){
 			throw new IDNotRecognisedException("The ID does not match any Stage");
@@ -491,184 +475,90 @@ public class CyclingPortal implements CyclingPortalInterface {
 	public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, Double averageGradient,
 			Double length) throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
 			InvalidStageTypeException {
-	/**
-	 * Adds a climb segment to a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId         The ID of the stage to which the climb segment is
-	 *                        being added.
-	 * @param location        The kilometre location where the climb finishes within
-	 *                        the stage.
-	 * @param type            The category of the climb - {@link SegmentType#C4},
-	 *                        {@link SegmentType#C3}, {@link SegmentType#C2},
-	 *                        {@link SegmentType#C1}, or {@link SegmentType#HC}.
-	 * @param averageGradient The average gradient for the climb.
-	 * @param length          The length of the climb in kilometre.
-	 * @return The ID of the segment created.
-	 * @throws IDNotRecognisedException   If the ID does not match to any stage in
-	 *                                    the system.
-	 * @throws InvalidLocationException   If the location is out of bounds of the
-	 *                                    stage length.
-	 * @throws InvalidStageStateException If the stage is "waiting for results".
-	 * @throws InvalidStageTypeException  Time-trial stages cannot contain any
-	 *                                    segment.
-	 */
-	Stage stage = correspondingObjectFinder(stageId, stageList);
+		Stage stage = correspondingObjectFinder(stageId, stageList);
 
-	if (stage == null){
-		throw new IDNotRecognisedException("The ID does not match to any race in the system.");
-	}
-	if (stage.getStageState() == "waiting for results"){
-		throw new InvalidStageStateException("Stage preparation has been concluded.");
-	}
-	if (stage.getType() == StageType.TT){
-		throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");                
-	}
-	if (location > stage.getLength()){
-		throw new InvalidLocationException("Segment location is out of bounds of the stage length.");
-	}
+		if (stage == null){
+			throw new IDNotRecognisedException("The ID does not match to any race in the system.");
+		}
+		if (stage.getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Stage preparation has been concluded.");
+		}
+		if (stage.getType() == StageType.TT){
+			throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");                
+		}
+		if (location > stage.getLength()){
+			throw new InvalidLocationException("Segment location is out of bounds of the stage length.");
+		}
 
-	Segment newClimb = new ClimbSegment(stageId, type, location, averageGradient, length);
-	stage.addSegment(newClimb);
-	segmentList.add(newClimb);
-	return newClimb.getId();
+		Segment newClimb = new ClimbSegment(stageId, type, location, averageGradient, length);
+		stage.addSegment(newClimb);
+		segmentList.add(newClimb);
+		return newClimb.getId();
 	}
 
 	@Override
 	public int addIntermediateSprintToStage(int stageId, double location) throws IDNotRecognisedException,
 			InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+		if (stage == null){
+			throw new IDNotRecognisedException("The ID does not match to any stage in the system.");
+		}
+		if (stage.getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Stage preparation has been concluded.");
+		}
+		if (stage.getType() == StageType.TT){
+			throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");                
+		}
+		if (location > stage.getLength()){
+			throw new InvalidLocationException("Segment location is out of bounds of the stage length.");
+		}
 
-	/**
-	 * Adds an intermediate sprint to a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId  The ID of the stage to which the intermediate sprint segment
-	 *                 is being added.
-	 * @param location The kilometre location where the intermediate sprint finishes
-	 *                 within the stage.
-	 * @return The ID of the segment created.
-	 * @throws IDNotRecognisedException   If the ID does not match to any stage in
-	 *                                    the system.
-	 * @throws InvalidLocationException   If the location is out of bounds of the
-	 *                                    stage length.
-	 * @throws InvalidStageStateException If the stage is "waiting for results".
-	 * @throws InvalidStageTypeException  Time-trial stages cannot contain any
-	 *                                    segment.
-	 */		
-
-	Stage stage = correspondingObjectFinder(stageId, stageList);
-	if (stage == null){
-		throw new IDNotRecognisedException("The ID does not match to any stage in the system.");
-	}
-	if (stage.getStageState() == "waiting for results"){
-		throw new InvalidStageStateException("Stage preparation has been concluded.");
-	}
-	if (stage.getType() == StageType.TT){
-		throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");                
-	}
-	if (location > stage.getLength()){
-		throw new InvalidLocationException("Segment location is out of bounds of the stage length.");
-	}
-
-	Segment newSprint = new Segment(stageId, SegmentType.SPRINT, location);
-	stage.addSegment(newSprint);
-	segmentList.add(newSprint);
-	return newSprint.getId();
+		Segment newSprint = new Segment(stageId, SegmentType.SPRINT, location);
+		stage.addSegment(newSprint);
+		segmentList.add(newSprint);
+		return newSprint.getId();
 	}
 
 	@Override
 	public void removeSegment(int segmentId) throws IDNotRecognisedException, InvalidStageStateException {
-	/**
-	 * Removes a segment from a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param segmentId The ID of the segment to be removed.
-	 * @throws IDNotRecognisedException   If the ID does not match to any segment in
-	 *                                    the system.
-	 * @throws InvalidStageStateException If the stage is "waiting for results".
-	 */
-	Segment segment = correspondingObjectFinder(segmentId, segmentList);
-	if (segment == null){
-		throw new IDNotRecognisedException("The given segment ID does not match any segment in the system");
-	}
-	Stage stageContainingSegment = correspondingObjectFinder(segment.getStageID(), stageList);
-	if (stageContainingSegment.getStageState() == "waiting for results"){
-		throw new InvalidStageStateException("Stage preparation has been concluded.");
-	}
-	deleteSegment(segment, stageContainingSegment);
+		Segment segment = correspondingObjectFinder(segmentId, segmentList);
+		if (segment == null){
+			throw new IDNotRecognisedException("The given segment ID does not match any segment in the system");
+		}
+		Stage stageContainingSegment = correspondingObjectFinder(segment.getStageID(), stageList);
+		if (stageContainingSegment.getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Stage preparation has been concluded.");
+		}
+		deleteSegment(segment, stageContainingSegment);
 	}
 
 	@Override
 	public void concludeStagePreparation(int stageId) throws IDNotRecognisedException, InvalidStageStateException {
-	/**
-	 * Concludes the preparation of a stage. After conclusion, the stage's state
-	 * should be "waiting for results".
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage to be concluded.
-	 * @throws IDNotRecognisedException   If the ID does not match to any stage in
-	 *                                    the system.
-	 * @throws InvalidStageStateException If the stage is "waiting for results".
-	 */
-
-	Stage stage = correspondingObjectFinder(stageId, stageList);
-	if (stage == null) {
-		throw new IDNotRecognisedException("The stageId does not match any stage in the system.");
-	}
-	if (stage.getStageState() == "waiting for results"){
-		throw new InvalidStageStateException("Stage preparation has already been concluded.");
-	}
-	stage.setStageState("waiting for results");
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+		if (stage == null) {
+			throw new IDNotRecognisedException("The stageId does not match any stage in the system.");
+		}
+		if (stage.getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Stage preparation has already been concluded.");
+		}
+		stage.setStageState("waiting for results");
 	}
 
 	@Override
 	public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
-		/**
-		 * Retrieves the list of segment (mountains and sprints) IDs of a stage.
-		 * <p>
-		 * The state of this MiniCyclingPortalInterface must be unchanged if any
-		 * exceptions are thrown.
-		 * 
-		 * @param stageId The ID of the stage being queried.
-		 * @return The list of segment IDs ordered (from first to last) by their location in the
-		 *         stage.
-		 * @throws IDNotRecognisedException If the ID does not match to any stage in the
-		 *                                  system.
-		 */		
-			Stage stage = correspondingObjectFinder(stageId, stageList);
-			if (stage == null){
-				throw new IDNotRecognisedException("The stage ID is not recognised in the system");
-			}
-			List<Integer> segmentIds = new ArrayList<Integer>();
-			for (Segment segment : stage.getSegments()) {
-				segmentIds.add(segment.getId());
-			}
-			return segmentIds.stream().mapToInt(i->i).toArray();
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+		if (stage == null){
+			throw new IDNotRecognisedException("The stage ID is not recognised in the system");
 		}
+		List<Integer> segmentIds = new ArrayList<Integer>();
+		for (Segment segment : stage.getSegments()) {
+			segmentIds.add(segment.getId());
+		}
+		return segmentIds.stream().mapToInt(i->i).toArray();
+	}
 
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
-			/**
-	 * Creates a team with name and description.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param name        The identifier name of the team.
-	 * @param description A description of the team.
-	 * @return The ID of the created team.
-	 * @throws IllegalNameException If the name already exists in the platform.
-	 * @throws InvalidNameException If the name is null, empty, has more than 30
-	 *                              characters, or has white spaces.
-	 */
 		if (name == null || name=="" || name.length()>30 || name.contains(" ")){
 			throw new InvalidNameException("Team name is null, empty, has more than 30 characters, or has whitespaces");
 		}
@@ -684,89 +574,41 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public void removeTeam(int teamId) throws IDNotRecognisedException {
-		/**
-		 * Removes a team from the system.
-		 * <p>
-		 * The state of this MiniCyclingPortalInterface must be unchanged if any
-		 * exceptions are thrown.
-		 * 
-		 * @param teamId The ID of the team to be removed.
-		 * @throws IDNotRecognisedException If the ID does not match to any team in the
-		 *                                  system.
-		 */
-			Team team = correspondingObjectFinder(teamId, teamList);
-			if (team == null) {
-				throw new IDNotRecognisedException("No team found with ID " + teamId);
-			}
-			deleteTeam(team);
-			return;
+		Team team = correspondingObjectFinder(teamId, teamList);
+		if (team == null) {
+			throw new IDNotRecognisedException("No team found with ID " + teamId);
 		}
+		deleteTeam(team);
+		return;
+	}
 
 	@Override
 	public int[] getTeams() {
-	/**
-	 * Get the list of teams' IDs in the system.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @return The list of IDs from the teams in the system. An empty list if there
-	 *         are no teams in the system.
-	 * 
-	 */	//if (teamList.size()==0){
-		// return null; // This potentially needs to be changed to an empty int[] instead of null
-	 	//}
 	 	List<Integer> teamIDs= new ArrayList<Integer>();
 		for (Team team : teamList){
 			teamIDs.add(team.getId());
 		}
-		return teamIDs.stream().mapToInt(i -> i).toArray();
+		return teamIDs.stream().mapToInt(i -> i).toArray();   //again array[teamlist.size]
 	}
 
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
-		/**
-		 * Get the riders of a team.
-		 * <p>
-		 * The state of this MiniCyclingPortalInterface must be unchanged if any
-		 * exceptions are thrown.
-		 * 
-		 * @param teamId The ID of the team being queried.
-		 * @return A list with riders' ID.
-		 * @throws IDNotRecognisedException If the ID does not match to any team in the
-		 *                                  system.
-		 */	
-			List<Rider> ridersInTeam=new ArrayList<Rider>();
-			List<Integer> teamRidersIDs=new ArrayList<Integer>();
-			Team team = correspondingObjectFinder(teamId, teamList);
-			if (team == null) {
-				throw new IDNotRecognisedException("No team found with ID " + teamId);
-			}
-			ridersInTeam=team.getRiders();
-			for (Rider rider : ridersInTeam){
-				teamRidersIDs.add(rider.getId());
-			}
-			return teamRidersIDs.stream().mapToInt(i->i).toArray();
+		List<Rider> ridersInTeam=new ArrayList<Rider>();
+		List<Integer> teamRidersIDs=new ArrayList<Integer>();
+		Team team = correspondingObjectFinder(teamId, teamList);
+		if (team == null) {
+			throw new IDNotRecognisedException("No team found with ID " + teamId);
 		}
+		ridersInTeam=team.getRiders();
+		for (Rider rider : ridersInTeam){
+			teamRidersIDs.add(rider.getId());
+		}
+		return teamRidersIDs.stream().mapToInt(i->i).toArray(); //again array[teamlist.size]
+	}
 
 	@Override
 	public int createRider(int teamID, String name, int yearOfBirth)
 			throws IDNotRecognisedException, IllegalArgumentException {
-	/**
-	 * Creates a rider.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param teamID      The ID rider's team.
-	 * @param name        The name of the rider.
-	 * @param yearOfBirth The year of birth of the rider.
-	 * @return The ID of the rider in the system.
-	 * @throws IDNotRecognisedException If the ID does not match to any team in the
-	 *                                  system.
-	 * @throws IllegalArgumentException If the name of the rider is null or the year
-	 *                                  of birth is less than 1900.
-	 */
 		if (yearOfBirth<1900 || name==null){
 			throw new IllegalArgumentException("Name of rider is null or year of birth is less than 1900");
 		}
@@ -783,219 +625,228 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public void removeRider(int riderId) throws IDNotRecognisedException {
-	/**
-	 * Removes a rider from the system. When a rider is removed from the platform,
-	 * all of its results should be also removed. Race results must be updated.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param riderId The ID of the rider to be removed.
-	 * @throws IDNotRecognisedException If the ID does not match to any rider in the
-	 *                                  system.
-	 */
-	Rider rider = correspondingObjectFinder(riderId, riderList);
-	if (rider == null){
-		throw new IDNotRecognisedException("The ID does not match any rider in the system");
-	}
-	Team teamContainingRider = correspondingObjectFinder(rider.getTeamID(), teamList);
-	deleteRider(rider, teamContainingRider);
-	}
+		Rider rider = correspondingObjectFinder(riderId, riderList);
+		if (rider == null){
+			throw new IDNotRecognisedException("The ID does not match any rider in the system");
+		}
+		Team teamContainingRider = correspondingObjectFinder(rider.getTeamID(), teamList);
+		deleteRider(rider, teamContainingRider);
+		}
 
 	@Override
 	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
 			throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
 			InvalidStageStateException {
 
-	/**
-	 * Record the times of a rider in a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId     The ID of the stage the result refers to.
-	 * @param riderId     The ID of the rider.
-	 * @param checkpoints An array of times at which the rider reached each of the
-	 *                    segments of the stage, including the start time and the
-	 *                    finish line.
-	 * @throws IDNotRecognisedException    If the ID does not match to any rider or
-	 *                                     stage in the system.
-	 * @throws DuplicatedResultException   Thrown if the rider has already a result
-	 *                                     for the stage. Each rider can have only
-	 *                                     one result per stage.
-	 * @throws InvalidCheckpointsException Thrown if the length of checkpoints is
-	 *                                     not equal to n+2, where n is the number
-	 *                                     of segments in the stage; +2 represents
-	 *                                     the start time and the finish time of the
-	 *                                     stage.
-	 * @throws InvalidStageStateException  Thrown if the stage is not "waiting for
-	 *                                     results". Results can only be added to a
-	 *                                     stage while it is "waiting for results".
-	 */
+		Rider rider = correspondingObjectFinder(riderId, riderList);
+		if (rider == null){
+			throw new IDNotRecognisedException("The  ID does not match to any rider system.");
+		}
+
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+		if (stage == null){
+			throw new IDNotRecognisedException("The  ID does not match to any stage system.");
+		}
+
+		if (!(stage.getStageState() == "waiting for results")){
+			throw new IDNotRecognisedException("Stage has not finished preparation");
+		}
+
+		for (RiderStageResults riderStageResults : stage.getRiderResultsList()){
+				if (riderStageResults.getRider().getId() == riderId){
+					throw new DuplicatedResultException("The rider has already a result for the stage. Each rider can have only one result per stage.");
+				}
+			}
+
+		if (!(checkpoints.length == stage.getSegments().size() + 2)){
+			throw new InvalidCheckpointsException("The number checkpoint times don't match the number of segments (+2)");
+		}
+
+		int raceId = stage.getRaceID();
+		RiderStageResults riderStageResults = new RiderStageResults(rider, stage, raceId, checkpoints);
+		stage.addRiderResultToStage(riderStageResults);
+		riderStageResultsList.add(riderStageResults);
+		rider.addStageResults(riderStageResults);
+
+	}
 
 
+	private LocalTime nanoToLocalTime(Long nanoseconds){
+		int second = (int) (nanoseconds / 1000_000_000); 
+        int minute = (int) (second / 60);
+        int hour = (int) (minute / 60);
+		//LocalTime localTime = new LocalTime();
 
-
-	Rider rider = correspondingObjectFinder(riderId, riderList);
-	//if (stage == null){
-	//	throw
-	//}
-
-	Stage stage = correspondingObjectFinder(stageId, stageList);
-	//if (stage == null){
-	//	throw
-	//}
-
-	int raceId = stage.getRaceID();
-	RiderStageResults riderResults = new RiderStageResults(riderId, stageId, raceId, checkpoints);
-	stage.addRiderToStage(riderResults);
-
-	rider.addStageResults(riderResults);
-	riderStageResultsList.add(riderResults);
-
-
+        nanoseconds %= 1000_000_000;
+        second %= 60;
+        minute %= 60;
+        hour %= 60;
+		LocalTime time = LocalTime.of(hour, minute, second, nanoseconds.intValue());
+		return time;
 	}
 
 	@Override
 	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
-/**
-	 * Get the times of a rider in a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage the result refers to.
-	 * @param riderId The ID of the rider.
-	 * @return The array of times at which the rider reached each of the segments of
-	 *         the stage and the total elapsed time. The elapsed time is the
-	 *         difference between the finish time and the start time. Return an
-	 *         empty array if there is no result registered for the rider in the
-	 *         stage.
-	 * @throws IDNotRecognisedException If the ID does not match to any rider or
-	 *                                  stage in the system.
-	 */		return null;
+		Stage stage= correspondingObjectFinder(stageId, stageList);
+		Rider rider = correspondingObjectFinder(riderId, riderList);
+
+		if (stage==null){
+			throw new IDNotRecognisedException("The  ID does not match any stage in the system.");
+
+		}
+
+		if (rider == null){
+			throw new IDNotRecognisedException("The  ID does not match any rider in the system.");
+		}
+		ArrayList<Long> times = new ArrayList<Long>();
+		ArrayList<LocalTime> results = new ArrayList<LocalTime>();
+
+		//throw exceptions///
+
+		for (RiderStageResults riderStageResults : rider.getRiderResultsList())
+			if (riderStageResults.getStage() == stage){
+				for (Long segmentTime : riderStageResults.getSegmentTimes()){
+					times.add(segmentTime + riderStageResults.getStartTime());
+				}
+				times.add(riderStageResults.getElapsedTimeForStage());
+				break;
+			}
+				
+		for (Long time : times){
+			results.add(nanoToLocalTime(time));
+		}
+		return results.toArray(new LocalTime[times.size()]);
 	}
 
 	@Override
 	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
-/**
-	 * For the general classification, the aggregated time is based on the adjusted
-	 * elapsed time, not the real elapsed time. Adjustments are made to take into
-	 * account groups of riders finishing very close together, e.g., the peloton. If
-	 * a rider has a finishing time less than one second slower than the
-	 * previous rider, then their adjusted elapsed time is the smallest of both. For
-	 * instance, a stage with 200 riders finishing "together" (i.e., less than 1
-	 * second between consecutive riders), the adjusted elapsed time of all riders
-	 * should be the same as the first of all these riders, even if the real gap
-	 * between the 200th and the 1st rider is much bigger than 1 second. There is no
-	 * adjustments on elapsed time on time-trials.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage the result refers to.
-	 * @param riderId The ID of the rider.
-	 * @return The adjusted elapsed time for the rider in the stage. Return null if 
-	 * 		  there is no result registered for the rider in the stage.
-	 * @throws IDNotRecognisedException   If the ID does not match to any rider or
-	 *                                    stage in the system.
-	 */		return null;
-	}
+
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+		if (stage == null){
+			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
+		}
+
+		Rider rider = correspondingObjectFinder(riderId, riderList);
+		if (rider == null){
+			throw new IDNotRecognisedException("The rider ID does not match any rider in the system");
+		}
+
+		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
+		adjustRiderTimesInStage(riderResultsList);
+		LocalTime adjustedTime = null;
+
+		for (RiderStageResults riderStageResults : riderResultsList){
+			if (riderStageResults.getRider() == rider){
+				adjustedTime = nanoToLocalTime(riderStageResults.getAdjustedTimeForStage());
+				break;
+			}
+		}
+		return adjustedTime;
+}
 
 	@Override
 	public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
-	/**
-* Removes the stage results from the rider.
-* <p>
-* The state of this MiniCyclingPortalInterface must be unchanged if any
-* exceptions are thrown.
-* 
-* @param stageId The ID of the stage the result refers to.
-* @param riderId The ID of the rider.
-* @throws IDNotRecognisedException If the ID does not match to any rider or
-*                                  stage in the system.
-*/
+
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+		if (stage == null){
+			throw new IDNotRecognisedException("The ID does not match any stage in the system");
+		}
+		Rider rider = correspondingObjectFinder(riderId, riderList);
+		if (rider == null){
+			throw new IDNotRecognisedException("The ID does not match any rider in the system");
+		}
+
+		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
+
+		for (RiderStageResults riderStageResults : riderResultsList) {
+			if (riderStageResults.getRider() == rider){
+				deleteRiderResult(riderStageResults);
+				break;
+			}
+		}
 	}
 
 	@Override
 	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
-	/**
-	 * Get the riders finished position in a a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage being queried.
-	 * @return A list of riders ID sorted by their elapsed time. An empty list if
-	 *         there is no result for the stage.
-	 * @throws IDNotRecognisedException If the ID does not match any stage in the
-	 *                                  system.
-	 */		
-	
-	return null;
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+
+		if (stage == null) {
+			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
+		}
+
+		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+		int[] riderIds = new int[riderResultsList.size()];
+		sortRidersByElapsedTime(riderResultsList);
+
+		for (int i = 0; i < riderResultsList.size(); i++){
+			riderIds[i] = riderResultsList.get(i).getRider().getId();
+		}
+		return riderIds;
 	}
 
 	@Override
 	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
-	/**
-	 * Get the adjusted elapsed times of riders in a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage being queried.
-	 * @return The ranked list of adjusted elapsed times sorted by their finish
-	 *         time. An empty list if there is no result for the stage. These times
-	 *         should match the riders returned by
-	 *         {@link #getRidersRankInStage(int)}.
-	 * @throws IDNotRecognisedException If the ID does not match any stage in the
-	 *                                  system.
-	 */		return null;
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+
+		if (stage == null) {
+			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
+		}
+
+		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+		LocalTime[] localTimes = new LocalTime[riderResultsList.size()];
+		adjustRiderTimesInStage(riderResultsList);
+		for (int i = 0; i < riderResultsList.size(); i++){
+			localTimes[i] = nanoToLocalTime(riderResultsList.get(i).getAdjustedTimeForStage());
+			}
+		return localTimes;
 	}
 
 	@Override
 	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
-	/**
-	 * Get the number of points obtained by each rider in a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage being queried.
-	 * @return The ranked list of points each riders received in the stage, sorted
-	 *         by their elapsed time. An empty list if there is no result for the
-	 *         stage. These points should match the riders returned by
-	 *         {@link #getRidersRankInStage(int)}.
-	 * @throws IDNotRecognisedException If the ID does not match any stage in the
-	 *                                  system.
-	 */		return null;
+		Stage stage = correspondingObjectFinder(stageId, stageList);
+
+		if (stage == null) {
+			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
+		}
+
+		awardPointsInStage(stage);
+		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+
+		int[] riderPoints = new int[riderResultsList.size()];
+		sortRidersByElapsedTime(riderResultsList);
+
+		for (int i = 0; i < riderResultsList.size(); i++){
+			riderPoints[i] = riderResultsList.get(i).getRiderPoints();
+		}
+		return riderPoints;
 	}
 
 	@Override
 	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
+		Stage stage = correspondingObjectFinder(stageId, stageList);
 
-	/**
-	 * Get the number of mountain points obtained by each rider in a stage.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param stageId The ID of the stage being queried.
-	 * @return The ranked list of mountain points each riders received in the stage,
-	 *         sorted by their finish time. An empty list if there is no result for
-	 *         the stage. These points should match the riders returned by
-	 *         {@link #getRidersRankInStage(int)}.
-	 * @throws IDNotRecognisedException If the ID does not match any stage in the
-	 *                                  system.
-	 */		return null;
-	}
+		if (stage == null) {
+			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
+		}
+	
+		awardMountainPointsInStage(stage);
+		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+	
+		int[] riderMountainPoints = new int[riderResultsList.size()];
+		sortRidersByElapsedTime(riderResultsList);
+	
+		for (int i = 0; i < riderResultsList.size(); i++){
+			riderMountainPoints[i] = riderResultsList.get(i).getRiderMountainPoints();
+		}
+		return riderMountainPoints;
+	 }
 
 	@Override
 	public void eraseCyclingPortal() {
 	/**
 	 * Method empties this MiniCyclingPortalInterface of its contents and resets all
-	 * internal counters.
-	 */
+	* internal counters.
+	*/
 		riderList.clear();
 		teamList.clear();
 		raceList.clear();
@@ -1006,17 +857,17 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public void saveCyclingPortal(String filename) throws IOException {
-        /**
-         * Method saves this MiniCyclingPortalInterface contents into a serialised file,
-         * with the filename given in the argument.
-         * <p>
-         * The state of this MiniCyclingPortalInterface must be unchanged if any
-         * exceptions are thrown.
-         *
-         * @param filename Location of the file to be saved.
-         * @throws IOException If there is a problem experienced when trying to save the
-         *                     store contents to the file.
-         */
+		/**
+		 * Method saves this MiniCyclingPortalInterface contents into a serialised file,
+		* with the filename given in the argument.
+		* <p>
+		* The state of this MiniCyclingPortalInterface must be unchanged if any
+		* exceptions are thrown.
+		*
+		* @param filename Location of the file to be saved.
+		* @throws IOException If there is a problem experienced when trying to save the
+		*                     store contents to the file.
+		*/
 		if (!filename.endsWith(".ser")){
 			filename+= ".ser";
 		}
@@ -1025,32 +876,32 @@ public class CyclingPortal implements CyclingPortalInterface {
 			file.delete();
 		}
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))){
-            oos.writeObject(riderList);
-            oos.writeObject(teamList);
-            oos.writeObject(raceList);
-            oos.writeObject(stageList);
-            oos.writeObject(segmentList);
-            oos.writeObject(riderStageResultsList);
-            System.out.printf("Saved in %s%n",filename);
+			oos.writeObject(riderList);
+			oos.writeObject(teamList);
+			oos.writeObject(raceList);
+			oos.writeObject(stageList);
+			oos.writeObject(segmentList);
+			oos.writeObject(riderStageResultsList);
+			System.out.printf("Saved in %s%n",filename);
 			oos.close();
-        }
+		}
 	}
 
 	@Override
 	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
 	/**
 	 * Method should load and replace this MiniCyclingPortalInterface contents with the
-	 * serialised contents stored in the file given in the argument.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 *
-	 * @param filename Location of the file to be loaded.
-	 * @throws IOException            If there is a problem experienced when trying
-	 *                                to load the store contents from the file.
-	 * @throws ClassNotFoundException If required class files cannot be found when
-	 *                                loading.
-	 */
+	* serialised contents stored in the file given in the argument.
+	* <p>
+	* The state of this MiniCyclingPortalInterface must be unchanged if any
+	* exceptions are thrown.
+	*
+	* @param filename Location of the file to be loaded.
+	* @throws IOException            If there is a problem experienced when trying
+	*                                to load the store contents from the file.
+	* @throws ClassNotFoundException If required class files cannot be found when
+	*                                loading.
+	*/
 	eraseCyclingPortal();
 	if (!filename.endsWith(".ser")){
 		filename+= ".ser";
@@ -1096,19 +947,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 	}
 
+
 	@Override
 	public void removeRaceByName(String name) throws NameNotRecognisedException {
-        /**
-         * The method removes the race and all its related information, i.e., stages,
-         * segments, and results.
-         * <p>
-         * The state of this MiniCyclingPortalInterface must be unchanged if any
-         * exceptions are thrown.
-         * 
-         * @param name The name of the race to be removed.
-         * @throws NameNotRecognisedException If the name does not match to any race in
-         *                                    the system.
-         */
 		Race race = null;
 		for (Race raceElement : raceList) {
 			if (raceElement.getName().equals(name)){
@@ -1124,164 +965,102 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
-	/**
-	 * Get the general classification times of riders in a race.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race being queried.
-	 * @return A list of riders' times sorted by the sum of their adjusted elapsed
-	 *         times in all stages of the race. An empty list if there is no result
-	 *         for any stage in the race. These times should match the riders
-	 *         returned by {@link #getRidersGeneralClassificationRank(int)}.
-	 * @throws IDNotRecognisedException If the ID does not match any race in the
-	 *                                  system.
-	 */		
-	 //A loop through list of stages in the race. 
-		 //Btake the rider id, find it as a rider object, remember its index
-		 // should probably make a list of rider objects.
-		 //Cget the adjusted elapsed time for the rider using the same index, sum the elapsed times in the total elapsed time attribute.
-		 //D sort riders by their total elapsed time.
-		 //abcd should be its own function
-		 //turn that into a list of rider times. :)
-	
-	 return null;
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The ID does not match any race in the system.");
+		}
+		ArrayList<Rider> riders = ridersTotalAdjustedTime(race);
+		LocalTime[] localTimes = new LocalTime[riders.size()];
+		for (int i = 0; i < riders.size(); i++){
+			localTimes[i] = nanoToLocalTime(riders.get(i).getTotalAdjustedTime());
+			}
+		return localTimes;
 	}
 
 	@Override
 	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
-
-        /**
-         * Get the overall points of riders in a race.
-         * <p>
-         * The state of this MiniCyclingPortalInterface must be unchanged if any
-         * exceptions are thrown.
-         * 
-         * @param raceId The ID of the race being queried.
-         * @return A list of riders' points (i.e., the sum of their points in all stages
-         *         of the race), sorted by the total elapsed time. An empty list if
-         *         there is no result for any stage in the race. These points should
-         *         match the riders returned by {@link #getRidersGeneralClassificationRank(int)}.
-         * @throws IDNotRecognisedException If the ID does not match any race in the
-         *                                  system.
-         */
-			//Aloop through list of stages in the race. 
-		 //Btake the rider ids, find it as a rider object, remember the index
-		 //Cin the stage object, get the points results for that rider using the same index, sum the points attribute in the rider class.
-		 //sort riders by their elapsed time.
-		 //abc own functino
-		 //turn that into a list of their points. :)
-		
-		 return null;
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The race ID does not match any race in the system");
+		}
+		ArrayList<Rider> riders = totalRidersPoints(race);
+		sortByTotalElapsedTime(riders);
+		int[] riderPoints = new int[riders.size()];
+		for (int i = 0; i < riders.size(); i++){
+			riderPoints[i] = riders.get(i).getTotalPoints();
+			}
+		return riderPoints;
 	}
 
 	@Override
 	public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
-
-	/**
-	 * Get the overall mountain points of riders in a race.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race being queried.
-	 * @return A list of riders' mountain points (i.e., the sum of their mountain
-	 *         points in all stages of the race), sorted by the total elapsed time.
-	 *         An empty list if there is no result for any stage in the race. These
-	 *         points should match the riders returned by
-	 *         {@link #getRidersGeneralClassificationRank(int)}.
-	 * @throws IDNotRecognisedException If the ID does not match any race in the
-	 *                                  system.
-	 */		
-			//Aloop through list of stages in the race. 
-		 //Btake the first rider id in the stage, find it as a rider object
-		 //Cget the mountain results for that stage using the same index, sum the mountainpoints attribute in the rider class.
-		 //sort riders by their total elapsed time.
-		 //abc own function
-		 //turn that into a list of mountainpoints (sorted by time). :)
-
-	
-	 return null;
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The race ID does not match any race in the system");
+		}
+		ArrayList<Rider> riders = totalRidersMountainPoints(race);
+		sortByTotalElapsedTime(riders);
+		int[] riderMountainPoints = new int[riders.size()];
+		for (int i = 0; i < riders.size(); i++){
+			riderMountainPoints[i] = riders.get(i).getTotalMountainPoints();
+			}
+		return riderMountainPoints;
 	}
 
 	@Override
-	public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {
-        /**
-         * Get the general classification rank of riders in a race.
-         * <p>
-         * The state of this MiniCyclingPortalInterface must be unchanged if any
-         * exceptions are thrown.
-         * 
-         * @param raceId The ID of the race being queried.
-         * @return A ranked list of riders' IDs sorted ascending by the sum of their
-         *         adjusted elapsed times in all stages of the race. That is, the first
-         *         in this list is the winner (least time). An empty list if there is no
-         *         result for any stage in the race.
-         * @throws IDNotRecognisedException If the ID does not match any race in the
-         *                                  system.
-         */		
+	public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {	
+		Race race = correspondingObjectFinder(raceId, raceList);
 
-		 //A loop through list of stages in the race. 
-		 //Btake the rider id, find it as a rider object, remember its index
-		 //Cget the adjusted elapsed time for the rider using the same index, sum the elapsed times in the total elapsed time attribute.
-		 //sort riders by their total elapsed time.
-		 //abc should be its own function
-		 //turn that into a list of their IDs. :)
-        return null;
+		if (race == null){
+			throw new IDNotRecognisedException("The ID does not match any race in the system.");
+		}
+		ArrayList<Rider> riders = ridersTotalAdjustedTime(race);
+
+		int[] riderIds = new int[riders.size()];
+
+		for (int i = 0; i < riders.size(); i++){
+			riderIds[i] = riders.get(i).getId();
+			}
+		return riderIds;
+	}
+
+	private void sortByTotalPoints(ArrayList<Rider> riders){
+		riders.sort(Comparator.comparing( (Rider rider) -> (rider.getTotalPoints()*-1 )));
 	}
 
 	@Override
 	public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
-	/**
-	 * Get the ranked list of riders based on the points classification in a race.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race being queried.
-	 * @return A ranked list of riders' IDs sorted descending by the sum of their
-	 *         points in all stages of the race. That is, the first in this list is
-	 *         the winner (more points). An empty list if there is no result for any
-	 *         stage in the race.
-	 * @throws IDNotRecognisedException If the ID does not match any race in the
-	 *                                  system.
-	 */
 
-		//Aloop through list of stages in the race. 
-		 //Btake the rider ids, find it as a rider object, remember the index
-		 //Cin the stage object, get the points results for that rider using the same index, sum the points attribute in the rider class.
-		 //Dsort riders by their total points.
-		 //abcd own functino
-		 //turn that into a list of their IDs. :)
-	 return null;
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The race ID does not match any race in the system");
+		}
+		ArrayList<Rider> riders = totalRidersPoints(race);
+		sortByTotalPoints(riders);
+		int[] riderPointsId = new int[riders.size()];
+		for (int i = 0; i < riders.size(); i++){
+			riderPointsId[i] = riders.get(i).getId();
+			}
+		return riderPointsId;
+	}
+
+	private void sortByTotalMountainPoints(ArrayList<Rider> riders){
+		riders.sort(Comparator.comparing( (Rider rider) -> (rider.getTotalMountainPoints()*-1)));
 	}
 
 	@Override
 	public int[] getRidersMountainPointClassificationRank(int raceId) throws IDNotRecognisedException {
-	/**
-	 * Get the ranked list of riders based on the mountain classification in a race.
-	 * <p>
-	 * The state of this MiniCyclingPortalInterface must be unchanged if any
-	 * exceptions are thrown.
-	 * 
-	 * @param raceId The ID of the race being queried.
-	 * @return A ranked list of riders' IDs sorted descending by the sum of their
-	 *         mountain points in all stages of the race. That is, the first in this
-	 *         list is the winner (more points). An empty list if there is no result
-	 *         for any stage in the race.
-	 * @throws IDNotRecognisedException If the ID does not match any race in the
-	 *                                  system.
-	 */		
-	
-		//loop through list of stages in the race. 
-		 //take the first rider id in the stage, find it as a rider object
-		 //get the mountain results for that stage using the same index, sum the mountainpoints attribute in the rider class.
-		 //sort riders by their total mountainpoints.
-		 //turn that into a list of their IDs. :)
-
-	
-	 return null;
+		Race race = correspondingObjectFinder(raceId, raceList);
+		if (race == null){
+			throw new IDNotRecognisedException("The race ID does not match any race in the system");
+		}
+		ArrayList<Rider> riders = totalRidersMountainPoints(race);
+		sortByTotalMountainPoints(riders);
+		int[] riderMountainPointsId = new int[riders.size()];
+		for (int i = 0; i < riders.size(); i++){
+			riderMountainPointsId[i] = riders.get(i).getId();
+			}
+		return riderMountainPointsId;
 	}
 
 }
