@@ -2,7 +2,7 @@ package cycling;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-public class Stage extends IdHaver implements Serializable{
+public class Stage extends IdHaver implements Serializable {
     private int id;
     private int raceID; //parent race id
     private StageType type;
@@ -15,7 +15,7 @@ public class Stage extends IdHaver implements Serializable{
     ArrayList<Segment> segments = new ArrayList<Segment>();
 
 
-    ArrayList<RiderStageResults> ridersInStage = new ArrayList<RiderStageResults>();
+    ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>();
 
     private static int numberOfStages = 0;
 
@@ -35,8 +35,8 @@ public class Stage extends IdHaver implements Serializable{
 
     }
 
-    public void addRiderToStage(RiderStageResults rider){
-        ridersInStage.add(rider);
+    public void addRiderResultToStage(RiderStageResults rider){
+        riderResultsList.add(rider);
     }
 
     public void addSegment(Segment segment){
@@ -66,7 +66,7 @@ public class Stage extends IdHaver implements Serializable{
     public double getLength() {return length;}
     public LocalDateTime getStartTime() { return startTime; }
     public String getStageState() { return stageState; }
-    public ArrayList<RiderStageResults> getRidersInStage(){ return ridersInStage; }
+    public ArrayList<RiderStageResults> getRiderResultsList(){ return riderResultsList; }
 
     public void setStageState(String stageState){
         this.stageState = stageState;
