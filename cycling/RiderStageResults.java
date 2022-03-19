@@ -1,13 +1,18 @@
 package cycling;
-import java.io.Serializable;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.io.Serializable;
+
+
+
 
 public class RiderStageResults implements Serializable{
-    private int id; //riderId
-    private int stageId;
+    private Rider rider;
+    private Stage stage;
     private int raceId;
+
+    private Long startTime;
 
     Long elapsedTimeForStage;
     Long adjustedTimeForStage;
@@ -16,15 +21,26 @@ public class RiderStageResults implements Serializable{
     int riderPoints = 0;  //finish pos + sprintPoints
     int riderMountainPoints = 0;
 
-    public RiderStageResults(int id, int stageId, int raceId, LocalTime... checkpoints){
-        this.id = id;
-        this.stageId = stageId;
+    public RiderStageResults(Rider rider, Stage stage, int raceId, LocalTime... checkpoints){
+        this.rider = rider;
+        this.stage = stage;
         this.raceId = raceId;
-        elapsedTimeForStage = checkpoints[0].until(checkpoints[checkpoints.length-1], ChronoUnit.MILLIS);   //stored time in milliseconds
+        startTime = checkpoints[0].toNanoOfDay();
+
+        elapsedTimeForStage = checkpoints[0].until(checkpoints[checkpoints.length-1], ChronoUnit.NANOS);   //stored time in milliseconds
         for (int i = 1; i < checkpoints.length-1; i++){
-            segmentTimes.add(checkpoints[0].until(checkpoints[i], ChronoUnit.MILLIS));
+            segmentTimes.add(checkpoints[0].until(checkpoints[i], ChronoUnit.NANOS));
         }
     }
+
+    public void setMountainPoints(int points){
+        riderPoints = points;
+        }
+
+    
+    public void setPoints(int points){
+        riderPoints = points;
+        }
 
     public void addPoints(int points){
         riderPoints += points;
@@ -38,10 +54,18 @@ public class RiderStageResults implements Serializable{
     public ArrayList<Long> getSegmentTimes(){ return segmentTimes; }
     public Long getSegmentTime(int index){ return segmentTimes.get(index);}
     public Long getElapsedTimeForStage(){ return elapsedTimeForStage; }
+    public int getRaceId(){ return raceId; }
 
+    public int getRiderPoints(){ return riderPoints; }
+    public int getRiderMountainPoints(){ return riderMountainPoints; }
+    
+
+    public Stage getStage(){ return stage; }
+    public Rider getRider(){ return rider; }
+
+    public Long getStartTime(){ return startTime; }
 
     public Long getAdjustedTimeForStage(){ return adjustedTimeForStage; }
-
 
     public void setAdjustedTimeForStage(Long adjustedTimeForStage){ this.adjustedTimeForStage = adjustedTimeForStage;}
 
