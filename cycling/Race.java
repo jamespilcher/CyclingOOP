@@ -47,5 +47,6 @@ public class Race extends IdHaver implements Serializable {
     public int getId() { return id; }
     public String getName() { return name; }
     public String getDescription() { return description; }
+    public static void resetID() {numberOfRaces=0;}
     
 }
