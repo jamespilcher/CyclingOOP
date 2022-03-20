@@ -71,4 +71,5 @@ public class Stage extends IdHaver implements Serializable {
     public void setStageState(String stageState){
         this.stageState = stageState;
     }
+    public static void resetID() {numberOfStages=0;}
 }
