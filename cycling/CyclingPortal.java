@@ -843,31 +843,27 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public void eraseCyclingPortal() {
-	/**
-	 * Method empties this MiniCyclingPortalInterface of its contents and resets all
-	* internal counters.
-	*/
+		Rider.resetID();
 		riderList.clear();
+
+		Team.resetID();
 		teamList.clear();
+
+
+		Race.resetID();
 		raceList.clear();
+
+		Stage.resetID();
 		stageList.clear();
+
+		Segment.resetID();
 		segmentList.clear();
+
 		riderStageResultsList.clear();
 	}
 
 	@Override
 	public void saveCyclingPortal(String filename) throws IOException {
-		/**
-		 * Method saves this MiniCyclingPortalInterface contents into a serialised file,
-		* with the filename given in the argument.
-		* <p>
-		* The state of this MiniCyclingPortalInterface must be unchanged if any
-		* exceptions are thrown.
-		*
-		* @param filename Location of the file to be saved.
-		* @throws IOException If there is a problem experienced when trying to save the
-		*                     store contents to the file.
-		*/
 		if (!filename.endsWith(".ser")){
 			filename+= ".ser";
 		}
@@ -876,32 +872,22 @@ public class CyclingPortal implements CyclingPortalInterface {
 			file.delete();
 		}
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))){
-			oos.writeObject(riderList);
-			oos.writeObject(teamList);
-			oos.writeObject(raceList);
-			oos.writeObject(stageList);
-			oos.writeObject(segmentList);
-			oos.writeObject(riderStageResultsList);
-			System.out.printf("Saved in %s%n",filename);
+            oos.writeObject(riderList);
+            oos.writeObject(teamList);
+            oos.writeObject(raceList);
+            oos.writeObject(stageList);
+            oos.writeObject(segmentList);
+            oos.writeObject(riderStageResultsList);
+            System.out.printf("Saved in %s%n",filename);
 			oos.close();
+        }
+		catch (IOException e){
+			throw new IOException("Failed to save contents to file");
 		}
 	}
 
 	@Override
 	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
-	/**
-	 * Method should load and replace this MiniCyclingPortalInterface contents with the
-	* serialised contents stored in the file given in the argument.
-	* <p>
-	* The state of this MiniCyclingPortalInterface must be unchanged if any
-	* exceptions are thrown.
-	*
-	* @param filename Location of the file to be loaded.
-	* @throws IOException            If there is a problem experienced when trying
-	*                                to load the store contents from the file.
-	* @throws ClassNotFoundException If required class files cannot be found when
-	*                                loading.
-	*/
 	eraseCyclingPortal();
 	if (!filename.endsWith(".ser")){
 		filename+= ".ser";
@@ -944,6 +930,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 				riderStageResultsList=(ArrayList<RiderStageResults>)obj;
 			}
 		}
+	}
+	catch(IOException e){
+		throw new IOException("Failed to load contents from file");
+	}
+	catch(ClassNotFoundException e)
+	{
+		throw new ClassNotFoundException("Required class files not found");
 	}
 	}
 
