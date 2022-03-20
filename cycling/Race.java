@@ -20,7 +20,7 @@ public class Race extends IdHaver implements Serializable {
 
   /**
    * Constructor for the Race class.
-
+   *
    * @param name the name of the race
    * @param description a description of the race
    */
