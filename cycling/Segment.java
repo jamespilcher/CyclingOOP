@@ -26,4 +26,5 @@ public class Segment extends IdHaver implements Serializable {
     public int getStageID() { return stageID; }
     public Double getLocation() { return location;}
     public SegmentType getSegmentType() { return type; }
+    public static void resetID() {numberOfSegments=0;}
 }
