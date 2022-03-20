@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * @author James Pilcher
  * @author Daniel Moulton
  * @version 1.0
- * 
  */
 public class Race extends IdHaver implements Serializable {
   private int id; // ID associated with this race
@@ -19,11 +18,9 @@ public class Race extends IdHaver implements Serializable {
   ArrayList<Stage> stages = new ArrayList<Stage>(); // An arraylist of stages within this race
   private static int numberOfRaces = 0; // The number of the races in existence.
 
-
-
   /**
    * Constructor for the Race class.
-   *
+
    * @param name the name of the race
    * @param description a description of the race
    */
@@ -33,7 +30,6 @@ public class Race extends IdHaver implements Serializable {
     id = ++numberOfRaces;
     super.setId(id);
   }
-
 
   /**
    * Adds a stage to this race.
