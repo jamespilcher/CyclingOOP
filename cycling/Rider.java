@@ -71,5 +71,8 @@ public class Rider extends IdHaver implements Serializable {
     
     public int getTotalPoints() {return totalPoints;}
     public int getTotalMountainPoints() {return totalMountainPoints;}
+    
+    public static void resetID() {numberofRiders=0;}
+
 
 }
