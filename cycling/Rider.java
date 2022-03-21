@@ -1,78 +1,208 @@
 package cycling;
+
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
+
+/**
+ * Represents a rider.
+ *
+ * @author James Pilcher
+ * @author Daniel Moulton
+ */
 public class Rider extends IdHaver implements Serializable {
-    
-    private int id;
-    private String riderName;
-    private int riderYearOfBirth;
-    private int teamID;
 
-    private Long totalAdjustedTime = 0L;
-    private Long totalElapsedTime = 0L;
+  private int id; // ID of the rider
+  private String riderName; // Name of the rider
+  private int riderYearOfBirth; // Year of birth of the rider
+  private int teamId; // ID of the team the rider belongs to
 
-
-    private int totalPoints = 0;
-    private int totalMountainPoints = 0;
-
-    private static int numberofRiders=0;
-
-    private ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>();
+  private Long totalAdjustedTime = 0L; /* Total time elapsed, adjusted for if a rider finishes
+                                        within a second of the rider ahead */
+  private Long totalElapsedTime = 0L; // Total time elapsed
 
 
-    public Rider(int riderYearOfBirth, String riderName, int teamID){
-        this.riderYearOfBirth=riderYearOfBirth;
-        this.riderName=riderName;
-        this.teamID=teamID;
-        id=++numberofRiders;
-        super.setId(id);
-    }
+  private int totalPoints = 0; // Total points rider has accumulated
+  private int totalMountainPoints = 0; // Total Mountain points rider has accumulated
 
-    public void addStageResults(RiderStageResults rider){
-        riderResultsList.add(rider);
-    }
+  private static int numberofRiders = 0; // Number of riders in the portal.
 
-    public void addTotalPoints(int points){
-        totalPoints += points;}
-    public void addTotalMountainPoints(int points){
-        totalMountainPoints += points;
-    }
-    public void addTotalAdjustedTime(Long time){
-        totalAdjustedTime += time;
-    }
-
-    public void addTotalElapsedTime(Long time){
-        totalElapsedTime += time;
-    }
-
-    public int getTeamID() {return teamID;}
-    public void setTeamID(int teamID) {this.teamID=teamID;}
-    public int getId() {return id;}
-
-    public Long getTotalElapsedTime(){
-        return totalElapsedTime;
-    }
-    public Long getTotalAdjustedTime(){
-        return totalAdjustedTime;
-    }
-
-    public ArrayList<RiderStageResults> getRiderResultsList() {return riderResultsList;}
-
-    public void setTotalAdjustedTime(Long time){
-        totalAdjustedTime=time;
-    }
-
-    public void setTotalElapsedTime(Long time){
-        totalElapsedTime=time;
-    }
-
-    public void setTotalPoints(int points) {totalPoints=points;}
-    public void setTotalMountainPoints(int points) {totalMountainPoints=points;}
-    
-    public int getTotalPoints() {return totalPoints;}
-    public int getTotalMountainPoints() {return totalMountainPoints;}
-    
-    public static void resetID() {numberofRiders=0;}
+  private LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(); 
 
 
+  /**
+   * Constructor for the rider class.
+   *
+   * @param riderYearOfBirth Year of birth of the rider
+   * @param riderName Name of the rider
+   * @param teamId ID of the team the rider belongs to
+   */
+  public Rider(int riderYearOfBirth, String riderName, int teamId) {
+    this.riderYearOfBirth = riderYearOfBirth;
+    this.riderName = riderName;
+    this.teamId = teamId;
+    id = ++numberofRiders;
+    super.setId(id);
+  }
+
+  /**
+   * Adds the rider's StageResult object for the corresponding stage to a LinkedList of all 
+   * the rider's stage results.
+   *
+   * @param rider Instace of the RiderStageResults object to be added to the LinkedList.
+   */
+  public void addStageResults(RiderStageResults rider) {
+    riderResultsList.add(rider);
+  }
+
+  /**
+   * Adds earnt points to the rider's total points.
+   *
+   * @param points The number of points to be added to the total points
+   */
+  public void addTotalPoints(int points) {
+    totalPoints += points;
+  }
+
+  /**
+   * Adds earnt mountain points to the rider's total mountain points.
+   *
+   * @param points The number of mountain points to be added to the total mountain points.
+   */
+  public void addTotalMountainPoints(int points) {
+    totalMountainPoints += points;
+  }
+
+  /**
+   * Adds adjusted time taken in specific stage for rider.
+   *
+   * @param time The time taken in specific stage for rider.
+   */
+  public void addTotalAdjustedTime(Long time) {
+    totalAdjustedTime += time;
+  }
+
+  /**
+   * Adds time taken in specific stage for rider.
+   *
+   * @param time The time taken in specific stage for rider.
+   */
+  public void addTotalElapsedTime(Long time) {
+    totalElapsedTime += time;
+  }
+
+
+  /**
+   * Gets ID of the team the rider belongs to.
+   *
+   * @return The ID of the team the rider belongs to.
+   */
+  public int getTeamId() {
+    return teamId;
+  }
+
+  /**
+   * Used to set/change the team ID of the rider.
+   *
+   * @param teamId ID of the team the rider belongs to
+   */
+  public void setTeamId(int teamId) {
+    this.teamId = teamId;
+  }
+
+  /**
+   * Gets the ID of the rider.
+   *
+   * @return ID of the rider.
+   */
+  public int getId() {
+    return id;
+  }
+
+  /**
+   * Gets total time taken by rider.
+   *
+   * @return total time taken by rider
+   */
+  public Long getTotalElapsedTime() {
+    return totalElapsedTime;
+  }
+
+  /**
+   * Gets total adjusted time taken by rider.
+   *
+   * @return total adjusted time taken by rider
+   */
+  public Long getTotalAdjustedTime() {
+    return totalAdjustedTime;
+  }
+
+  /**
+   * Gets all the RiderStageResults objects belonging to the rider.
+   *
+   * @return LinkedList of all RiderStageResults objects belonging to the rider
+   */
+  public LinkedList<RiderStageResults> getRiderResultsList() {
+    return riderResultsList;
+  }
+
+  /**
+   * Sets the total adjusted time for the rider.
+   *
+   * @param time Value to set total adjusted time to.
+   */
+  public void setTotalAdjustedTime(Long time) {
+    totalAdjustedTime = time;
+  }
+
+  /**
+   * Set total elapsed time for the rider.
+   *
+   * @param time Value to set total elapsed time to.
+   */
+  public void setTotalElapsedTime(Long time) {
+    totalElapsedTime = time;
+  }
+
+  /**
+   * Set total points for the rider.
+   *
+   * @param points Value to set total points to.
+   */
+  public void setTotalPoints(int points) {
+    totalPoints = points;
+  }
+
+  /**
+   * Set total mountain points for the rider.
+   *
+   * @param points Value to set total mountain points to
+   */
+  public void setTotalMountainPoints(int points) {
+    totalMountainPoints = points;
+  }
+
+  /**
+   * Gets total points for rider.
+   *
+   * @return Total points for the rider
+   */
+  public int getTotalPoints() {
+    return totalPoints;
+  }
+
+  /**
+   * Gets total mountain points for rider.
+   *
+   * @return total mountain points for rider
+   */
+  public int getTotalMountainPoints() {
+    return totalMountainPoints;
+  }
+
+  /**
+   * Reset the number of riders, used when erasing the cycling portal to reset to an empty state.
+   */
+  public static void resetId() {
+    numberofRiders = 0;
+  }
 }
