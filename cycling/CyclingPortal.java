@@ -31,10 +31,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	//points awarded depending on position in stage
 
-	private final Integer[] FLAT_STAGE_POINTS = {50,30,20,18,16,14,12,10,8,7,6,5,4,3,2};
-	private final Integer[] MM_STAGE_POINTS = {30,25,22,19,17,15,13,11,9,7,6,5,4,3,2};
-	private final Integer[] HM_STAGE_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
-	private final Integer[] TT_STAGE_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
+	private static final Integer[] FLAT_STAGE_POINTS = {50,30,20,18,16,14,12,10,8,7,6,5,4,3,2};
+	private static final Integer[] MM_STAGE_POINTS = {30,25,22,19,17,15,13,11,9,7,6,5,4,3,2};
+	private static final Integer[] HM_STAGE_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
+	private static final Integer[] TT_STAGE_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
 
 	//list of riders
     private LinkedList<Rider> riderList=new LinkedList<Rider>();
@@ -183,7 +183,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 				//System.out.println("points = " + points);
 			}
 		}
-		return;
+		
 	}
 
 
@@ -224,7 +224,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 				awardSegmentPoints(riderResultsList, segment, segments, segmentPointsToBeAdded, true);
 			}
 		}
-		return;
+		
 		}			
 
 
@@ -577,7 +577,6 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("No team found with ID " + teamId);
 		}
 		deleteTeam(team);
-		return;
 	}
 
 	@Override
