@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Comparator;
@@ -69,20 +68,20 @@ public class CyclingPortal implements CyclingPortalInterface {
         return correspondingObject;
     }
 
-	void deleteAllRiderResults(Rider rider){
+	private void deleteAllRiderResults(Rider rider){
 		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(rider.getRiderResultsList());
 		for (RiderStageResults riderStageResults : riderResultsList){
 			deleteRiderResult(riderStageResults);
 		}
 	}
 
-	void deleteRiderResult(RiderStageResults riderStageResults){
+	private void deleteRiderResult(RiderStageResults riderStageResults){
 		riderStageResults.getStage().getRiderResultsList().remove(riderStageResults);
 		riderStageResults.getRider().getRiderResultsList().remove(riderStageResults);
 		riderStageResultsList.remove(riderStageResults);
 	}
 
-	void deleteAllStageResults(Stage stage){
+	private void deleteAllStageResults(Stage stage){
 		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
 		for (RiderStageResults riderStageResults : riderResultsList){
 			deleteRiderResult(riderStageResults);
@@ -191,7 +190,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
 
-	void awardPointsInStage(Stage stage){
+	private void awardPointsInStage(Stage stage){
 		//zero out the points - segment included!
 		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
 
@@ -229,7 +228,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}			
 
 
-	void awardMountainPointsInStage(Stage stage){
+	private void awardMountainPointsInStage(Stage stage){
 		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
 		LinkedList<Integer> pointsToBeAdded = new LinkedList<Integer>();
 		sortRidersByElapsedTime(riderResultsList);
