@@ -842,20 +842,20 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 		public void eraseCyclingPortal() {
-			Rider.resetId();
+			Rider.resetIdCounter();
 			riderList.clear();
 
-			Team.resetId();
+			Team.resetIdCounter();
 			teamList.clear();
 
 
-			Race.resetId();
+			Race.resetIdCounter();
 			raceList.clear();
 
-			Stage.resetId();
+			Stage.resetIdCounter();
 			stageList.clear();
 
-			Segment.resetId();
+			Segment.resetIdCounter();
 			segmentList.clear();
 
 			riderStageResultsList.clear();
