@@ -11,9 +11,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 
 /**
  * CyclingPortal is an implementor of the CyclingPortalInterface interface.
@@ -23,45 +22,43 @@ import java.util.Comparator;
  *
  */
 public class CyclingPortal implements CyclingPortalInterface {
-
-	//CONSTANTS
-	private ArrayList<Integer>sprintSegmentPoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
-	private ArrayList<Integer>hcSegmentPoints = new ArrayList<Integer>(Arrays.asList(20,15,12,10,8,6,4,2));
-	private ArrayList<Integer>c1SegmentPoints = new ArrayList<Integer>(Arrays.asList(10,8,6,4,2,1));
-	private ArrayList<Integer>c2SegmentPoints = new ArrayList<Integer>(Arrays.asList(5,3,2,1));
-	private ArrayList<Integer>c3SegmentPoints = new ArrayList<Integer>(Arrays.asList(2,1));
-	private ArrayList<Integer>c4SegmentPoints = new ArrayList<Integer>(Arrays.asList(1));
+//CONSTANTS
+	private static final Integer[] SPRINT_SEGMENT_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
+	private static final Integer[] HC_SEGMENT_POINTS = {20,15,12,10,8,6,4,2};
+	private static final Integer[] C1_SEGMENT_POINTS = {10,8,6,4,2,1};
+	private static final Integer[] C2_SEGMENT_POINTS = {5,3,2,1};
+	private static final Integer[] C3_SEGMENT_POINTS = {2,1};
+	private static final Integer[] C4_SEGMENT_POINTS = {1};
 
 	//points awarded depending on position in stage
 
-	private ArrayList<Integer>flatStagePoints = new ArrayList<Integer>(Arrays.asList(50,30,20,18,16,14,12,10,8,7,6,5,4,3,2));
-	private ArrayList<Integer>mediumMountainStagePoints = new ArrayList<Integer>(Arrays.asList(30,25,22,19,17,15,13,11,9,7,6,5,4,3,2));
-	private ArrayList<Integer>highMountainStagePoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
-	private ArrayList<Integer>timeTrialStagePoints = new ArrayList<Integer>(Arrays.asList(20,17,15,13,11,10,9,8,7,6,5,4,3,2,1));
-
+	private final Integer[] FLAT_STAGE_POINTS = {50,30,20,18,16,14,12,10,8,7,6,5,4,3,2};
+	private final Integer[] MM_STAGE_POINTS = {30,25,22,19,17,15,13,11,9,7,6,5,4,3,2};
+	private final Integer[] HM_STAGE_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
+	private final Integer[] TT_STAGE_POINTS = {20,17,15,13,11,10,9,8,7,6,5,4,3,2,1};
 
 	//list of riders
-    private ArrayList<Rider> riderList=new ArrayList<Rider>();
+    private LinkedList<Rider> riderList=new LinkedList<Rider>();
 
 	//list of teams
-    private ArrayList<Team> teamList=new ArrayList<Team>();
+    private LinkedList<Team> teamList=new LinkedList<Team>();
 
 	//list of segments
-    private ArrayList<Segment> segmentList=new ArrayList<Segment>();
-	public ArrayList<Segment> getSegmentList() {return segmentList;}
+    private LinkedList<Segment> segmentList=new LinkedList<Segment>();
+	public LinkedList<Segment> getSegmentList() {return segmentList;}
 
 	//list of stages
-    private ArrayList<Stage> stageList=new ArrayList<Stage>();
-	public ArrayList<Stage> getStageList() {return stageList;}
+    private LinkedList<Stage> stageList=new LinkedList<Stage>();
+	public LinkedList<Stage> getStageList() {return stageList;}
 
 	//list of races
-    private ArrayList<Race> raceList=new ArrayList<Race>();
-	public ArrayList<Race> getRaceList() {return raceList;}
+    private LinkedList<Race> raceList=new LinkedList<Race>();
+	public LinkedList<Race> getRaceList() {return raceList;}
 
-	private ArrayList<RiderStageResults> riderStageResultsList=new ArrayList<RiderStageResults>();
+	private LinkedList<RiderStageResults> riderStageResultsList=new LinkedList<RiderStageResults>();
 
 
-    private <T extends IdHaver> T correspondingObjectFinder(int id, ArrayList<T> objectList){
+    private <T extends IdHaver> T correspondingObjectFinder(int id, LinkedList<T> objectList){
         T correspondingObject = null;
         for (T object : objectList) {
             if (id == object.getId()){
@@ -73,7 +70,7 @@ public class CyclingPortal implements CyclingPortalInterface {
     }
 
 	void deleteAllRiderResults(Rider rider){
-		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(rider.getRiderResultsList());
+		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(rider.getRiderResultsList());
 		for (RiderStageResults riderStageResults : riderResultsList){
 			deleteRiderResult(riderStageResults);
 		}
@@ -86,7 +83,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 	void deleteAllStageResults(Stage stage){
-		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
+		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
 		for (RiderStageResults riderStageResults : riderResultsList){
 			deleteRiderResult(riderStageResults);
 		}
@@ -94,7 +91,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	private void deleteTeam(Team team){
 		teamList.remove(team.getId());
-		ArrayList<Rider>riders = new ArrayList<Rider>(team.getRiders());
+		LinkedList<Rider>riders = new LinkedList<Rider>(team.getRiders());
 		for (Rider rider : riders){
 			deleteRider(rider, team);
 		}
@@ -111,7 +108,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	private void deleteRace(Race race){
 		raceList.remove(race);
-		ArrayList<Stage>raceStages = new ArrayList<Stage>(race.getStages());
+		LinkedList<Stage>raceStages = new LinkedList<Stage>(race.getStages());
 		for (Stage stage : raceStages) {
 			deleteStage(stage, race);
 		}
@@ -120,7 +117,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 	private void deleteStage(Stage stage, Race race){
 		stageList.remove(stage);
 		race.removeStage(stage);
-		ArrayList<Segment>stageSegments = new ArrayList<Segment>(stage.getSegments());
+		LinkedList<Segment>stageSegments = new LinkedList<Segment>(stage.getSegments());
 		for (Segment segment : stageSegments) {
 			deleteSegment(segment, stage);
 		}
@@ -135,12 +132,12 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		
-	private void sortRidersByElapsedTime(ArrayList<RiderStageResults> competingRiders){
+	private void sortRidersByElapsedTime(LinkedList<RiderStageResults> competingRiders){
 		competingRiders.sort(Comparator.comparing( (RiderStageResults rider) -> rider.getElapsedTimeForStage()));
 
 	}
 	
-	private void adjustRiderTimesInStage(ArrayList<RiderStageResults> competingRiders){
+	private void adjustRiderTimesInStage(LinkedList<RiderStageResults> competingRiders){
 
 		sortRidersByElapsedTime(competingRiders);
 
@@ -156,21 +153,22 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 
-	private ArrayList<Integer> pointsToBeAddedFormatter(int numRiders, ArrayList<Integer> rankPoints){
-		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
-		pointsToBeAdded.addAll(rankPoints);
-		if (numRiders > rankPoints.size()){
-			int sizeDifference = numRiders - rankPoints.size();
-			for (int i = 0; i < sizeDifference; i++)
+	private LinkedList<Integer> pointsToBeAddedFormatter(int numRiders, Integer[] rankPoints){
+		int rankPointsSize = rankPoints.length;
+		LinkedList<Integer> pointsToBeAdded = new LinkedList<Integer>(Arrays.asList(rankPoints));
+		if (numRiders > rankPointsSize){
+			int sizeDifference = numRiders - rankPointsSize;
+			for (int i = 0; i < sizeDifference; i++) {
 				pointsToBeAdded.add(0);
+			}
 		}
 		return pointsToBeAdded;
 	}
 
-	private void awardSegmentPoints(ArrayList<RiderStageResults> competingRiders, Segment segment, ArrayList<Segment> stageSegments, ArrayList<Integer> segmentPointsToBeAdded, boolean isASprintSegment){
+	private void awardSegmentPoints(LinkedList<RiderStageResults> competingRiders, Segment segment, LinkedList<Segment> stageSegments, LinkedList<Integer> segmentPointsToBeAdded, boolean isASprintSegment){
 		int indexForSegment = stageSegments.indexOf(segment);
 
-		ArrayList<RiderStageResults> ridersInSegment = new ArrayList<RiderStageResults>(competingRiders);
+		LinkedList<RiderStageResults> ridersInSegment = new LinkedList<RiderStageResults>(competingRiders);
 		ridersInSegment.sort(Comparator.comparing( (RiderStageResults rider) -> rider.getSegmentTime(indexForSegment)));
 
 		for (RiderStageResults rider : ridersInSegment) {
@@ -195,33 +193,35 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	void awardPointsInStage(Stage stage){
 		//zero out the points - segment included!
-		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
+		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
 
-		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
+		LinkedList<Integer> pointsToBeAdded = new LinkedList<Integer>();
 		sortRidersByElapsedTime(riderResultsList);
-		if (stage.getType() == StageType.FLAT){
-			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), flatStagePoints);
+		int riderResultsListSize = riderResultsList.size();
+		StageType stageType = stage.getType();
+		switch (stageType) {
+			case FLAT: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, FLAT_STAGE_POINTS);
+				break;
+			case MEDIUM_MOUNTAIN: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, MM_STAGE_POINTS);
+				break;
+			case HIGH_MOUNTAIN: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, HM_STAGE_POINTS);
+				break;
+			case TT: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, TT_STAGE_POINTS);
+				break;
+			default: assert false;
+
 		}
-		else if (stage.getType() == StageType.MEDIUM_MOUNTAIN){
-			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), mediumMountainStagePoints);
-		}
-		else if (stage.getType() == StageType.HIGH_MOUNTAIN){
-			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), highMountainStagePoints);
-		}
-		else if (stage.getType() == StageType.TT){
-			pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), timeTrialStagePoints);
-		}
+
 		for (RiderStageResults riderStageResults : riderResultsList){
 			int indexForPoints = riderResultsList.indexOf(riderStageResults);
-
 			int points = pointsToBeAdded.get(indexForPoints);
 			riderStageResults.setPoints(points);
 		}
-		ArrayList<Segment> segments = new ArrayList<Segment>(stage.getSegments());
-		ArrayList<Integer> segmentPointsToBeAdded = new ArrayList<Integer>(sprintSegmentPoints);
+		LinkedList<Segment> segments = new LinkedList<Segment>(stage.getSegments());
+		LinkedList<Integer> segmentPointsToBeAdded = new LinkedList<Integer>();
 		for (Segment segment : segments){
 			if (segment.getSegmentType() == SegmentType.SPRINT){
-				segmentPointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), sprintSegmentPoints);
+				segmentPointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), SPRINT_SEGMENT_POINTS);
 				awardSegmentPoints(riderResultsList, segment, segments, segmentPointsToBeAdded, true);
 			}
 		}
@@ -230,33 +230,32 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
 	void awardMountainPointsInStage(Stage stage){
-		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
-		ArrayList<Integer> pointsToBeAdded = new ArrayList<Integer>();
+		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
+		LinkedList<Integer> pointsToBeAdded = new LinkedList<Integer>();
 		sortRidersByElapsedTime(riderResultsList);
 
 		for (RiderStageResults riderStageResults : riderResultsList){
 			riderStageResults.setMountainPoints(0);
 		}
 
-		ArrayList<Segment> segments = new ArrayList<Segment>(stage.getSegments());
+		LinkedList<Segment> segments = new LinkedList<Segment>(stage.getSegments());
 
 		for (Segment segment : segments){
 			SegmentType segmentType = segment.getSegmentType();
+			int riderResultsListSize = riderResultsList.size();
 			if (!(segmentType == SegmentType.SPRINT)){
-				if (segmentType == SegmentType.C1){
-					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c1SegmentPoints);
-				}
-				else if (segmentType == SegmentType.C2){
-					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c2SegmentPoints);
-				}
-				else if (segmentType == SegmentType.C3){
-					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c3SegmentPoints);
-				}
-				else if (segmentType == SegmentType.C4){
-					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), c4SegmentPoints);
-				}
-				else if (segmentType == SegmentType.HC){
-					pointsToBeAdded = pointsToBeAddedFormatter(riderResultsList.size(), hcSegmentPoints);
+				switch (segmentType){
+					case C1: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, C1_SEGMENT_POINTS);
+						break;
+					case C2: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, C2_SEGMENT_POINTS);
+						break;
+					case C3: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, C3_SEGMENT_POINTS);
+						break;
+					case C4: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, C4_SEGMENT_POINTS);
+						break;
+					case HC: pointsToBeAdded = pointsToBeAddedFormatter(riderResultsListSize, HC_SEGMENT_POINTS);
+						break;
+					default: assert false;
 				}
 				awardSegmentPoints(riderResultsList, segment, segments, pointsToBeAdded, false);
 			}
@@ -268,10 +267,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
 
-	private ArrayList<Rider> totalRidersPoints(Race race){
+	private LinkedList<Rider> totalRidersPoints(Race race){
 
 		//maybe store riders just in race instead? this is inneficient.
-		ArrayList<Rider> riders = new ArrayList<Rider>();
+		LinkedList<Rider> riders = new LinkedList<Rider>();
 		for (Rider allRider : riderList){
 			allRider.setTotalElapsedTime(0L);
 			allRider.setTotalPoints(0);
@@ -291,10 +290,10 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return riders;
 	}
 
-	private ArrayList<Rider> totalRidersMountainPoints(Race race){
+	private LinkedList<Rider> totalRidersMountainPoints(Race race){
 
 		//maybe store riders just in race instead? this is inneficient.
-		ArrayList<Rider> riders = new ArrayList<Rider>();
+		LinkedList<Rider> riders = new LinkedList<Rider>();
 		for (Rider allRider : riderList){
 			allRider.setTotalElapsedTime(0L);
 			allRider.setTotalMountainPoints(0);
@@ -318,24 +317,24 @@ public class CyclingPortal implements CyclingPortalInterface {
 	}
 
 
-	private void sortByTotalElapsedTime(ArrayList<Rider> riders){
+	private void sortByTotalElapsedTime(LinkedList<Rider> riders){
 		riders.sort(Comparator.comparing( (Rider rider) -> rider.getTotalElapsedTime()));
 	}
 
-	private void sortByTotalAdjustedTime(ArrayList<Rider> riders){
+	private void sortByTotalAdjustedTime(LinkedList<Rider> riders){
 		riders.sort(Comparator.comparing( (Rider rider) -> rider.getTotalAdjustedTime()));
 	}
 
 
-	private ArrayList<Rider> ridersTotalAdjustedTime(Race race){
+	private LinkedList<Rider> ridersTotalAdjustedTime(Race race){
 
 		//maybe store riders just in race instead? this is inneficient.
-		ArrayList<Rider> riders = new ArrayList<Rider>();
+		LinkedList<Rider> riders = new LinkedList<Rider>();
 		for (Rider allRider : riderList){
 			allRider.setTotalAdjustedTime(0L);
 		}
 		for (Stage stage : race.getStages()){
-			ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
+			LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
 			if (riderResultsList.size() == 0){
 				break;
 			}
@@ -354,7 +353,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 	
 	@Override
 	public int[] getRaceIds() {
-			List<Integer> raceIds = new ArrayList<Integer>();
+			List<Integer> raceIds = new LinkedList<Integer>();
 			for (Race race: raceList) {
 				raceIds.add(race.getId());
 			}
@@ -444,7 +443,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The race ID is not recognised in the system");
 		}
-		List<Integer> stageIds = new ArrayList<Integer>();
+		List<Integer> stageIds = new LinkedList<Integer>();
 		for (Stage stage : race.getStages()) {
 			stageIds.add(stage.getId());
 		}
@@ -550,7 +549,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (stage == null){
 			throw new IDNotRecognisedException("The stage ID is not recognised in the system");
 		}
-		List<Integer> segmentIds = new ArrayList<Integer>();
+		List<Integer> segmentIds = new LinkedList<Integer>();
 		for (Segment segment : stage.getSegments()) {
 			segmentIds.add(segment.getId());
 		}
@@ -584,7 +583,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public int[] getTeams() {
-	 	List<Integer> teamIDs= new ArrayList<Integer>();
+	 	List<Integer> teamIDs= new LinkedList<Integer>();
 		for (Team team : teamList){
 			teamIDs.add(team.getId());
 		}
@@ -593,8 +592,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
-		List<Rider> ridersInTeam=new ArrayList<Rider>();
-		List<Integer> teamRidersIDs=new ArrayList<Integer>();
+		List<Rider> ridersInTeam=new LinkedList<Rider>();
+		List<Integer> teamRidersIDs=new LinkedList<Integer>();
 		Team team = correspondingObjectFinder(teamId, teamList);
 		if (team == null) {
 			throw new IDNotRecognisedException("No team found with ID " + teamId);
@@ -698,8 +697,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (rider == null){
 			throw new IDNotRecognisedException("The  ID does not match any rider in the system.");
 		}
-		ArrayList<Long> times = new ArrayList<Long>();
-		ArrayList<LocalTime> results = new ArrayList<LocalTime>();
+		LinkedList<Long> times = new LinkedList<Long>();
+		LinkedList<LocalTime> results = new LinkedList<LocalTime>();
 
 		//throw exceptions///
 
@@ -731,7 +730,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("The rider ID does not match any rider in the system");
 		}
 
-		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
+		LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
 		adjustRiderTimesInStage(riderResultsList);
 		LocalTime adjustedTime = null;
 
@@ -756,7 +755,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("The ID does not match any rider in the system");
 		}
 
-		ArrayList<RiderStageResults> riderResultsList = new ArrayList<RiderStageResults>(stage.getRiderResultsList());
+		LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
 
 		for (RiderStageResults riderStageResults : riderResultsList) {
 			if (riderStageResults.getRider() == rider){
@@ -774,7 +773,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
 		}
 
-		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+		LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
 		int[] riderIds = new int[riderResultsList.size()];
 		sortRidersByElapsedTime(riderResultsList);
 
@@ -792,7 +791,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 			throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
 		}
 
-		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+		LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
 		LocalTime[] localTimes = new LocalTime[riderResultsList.size()];
 		adjustRiderTimesInStage(riderResultsList);
 		for (int i = 0; i < riderResultsList.size(); i++){
@@ -810,7 +809,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 
 		awardPointsInStage(stage);
-		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+		LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
 
 		int[] riderPoints = new int[riderResultsList.size()];
 		sortRidersByElapsedTime(riderResultsList);
@@ -830,7 +829,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		}
 	
 		awardMountainPointsInStage(stage);
-		ArrayList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
+		LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList(); //if no results this will be size 0
 	
 		int[] riderMountainPoints = new int[riderResultsList.size()];
 		sortRidersByElapsedTime(riderResultsList);
@@ -842,102 +841,102 @@ public class CyclingPortal implements CyclingPortalInterface {
 	 }
 
 	@Override
-	public void eraseCyclingPortal() {
-		Rider.resetID();
-		riderList.clear();
+		public void eraseCyclingPortal() {
+			Rider.resetId();
+			riderList.clear();
 
-		Team.resetID();
-		teamList.clear();
+			Team.resetId();
+			teamList.clear();
 
 
-		Race.resetID();
-		raceList.clear();
+			Race.resetId();
+			raceList.clear();
 
-		Stage.resetID();
-		stageList.clear();
+			Stage.resetId();
+			stageList.clear();
 
-		Segment.resetID();
-		segmentList.clear();
+			Segment.resetId();
+			segmentList.clear();
 
-		riderStageResultsList.clear();
-	}
+			riderStageResultsList.clear();
+		}
 
 	@Override
-	public void saveCyclingPortal(String filename) throws IOException {
+		public void saveCyclingPortal(String filename) throws IOException {
+			if (!filename.endsWith(".ser")){
+				filename+= ".ser";
+			}
+			File file = new File(filename);
+			if (file.exists() && !file.isDirectory()){
+				file.delete();
+			}
+			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))){
+				oos.writeObject(riderList);
+				oos.writeObject(teamList);
+				oos.writeObject(raceList);
+				oos.writeObject(stageList);
+				oos.writeObject(segmentList);
+				oos.writeObject(riderStageResultsList);
+				System.out.printf("Saved in %s%n",filename);
+				oos.close();
+			}
+			catch (IOException e){
+				throw new IOException("Failed to save contents to file");
+			}
+		}
+
+	@Override
+		public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
+		eraseCyclingPortal();
 		if (!filename.endsWith(".ser")){
 			filename+= ".ser";
 		}
-		File file = new File(filename);
-		if (file.exists() && !file.isDirectory()){
-			file.delete();
-		}
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))){
-            oos.writeObject(riderList);
-            oos.writeObject(teamList);
-            oos.writeObject(raceList);
-            oos.writeObject(stageList);
-            oos.writeObject(segmentList);
-            oos.writeObject(riderStageResultsList);
-            System.out.printf("Saved in %s%n",filename);
-			oos.close();
-        }
-		catch (IOException e){
-			throw new IOException("Failed to save contents to file");
-		}
-	}
-
-	@Override
-	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
-	eraseCyclingPortal();
-	if (!filename.endsWith(".ser")){
-		filename+= ".ser";
-	}
-	try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))){
-		Object obj=ois.readObject();
-		if (obj instanceof ArrayList<?>){
-			if(((ArrayList<?>)obj).get(0) instanceof Rider)
-			{
-				riderList=(ArrayList<Rider>)obj;
-			}		
-		}
-		obj=ois.readObject();
-		if (obj instanceof ArrayList<?>){
-			if(((ArrayList<?>)obj).get(0) instanceof Team){
-				teamList=(ArrayList<Team>)obj;
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))){
+			Object obj=ois.readObject();
+			if (obj instanceof LinkedList<?>){
+				if(((LinkedList<?>)obj).get(0) instanceof Rider)
+				{
+					riderList=(LinkedList<Rider>)obj;
+				}		
+			}
+			obj=ois.readObject();
+			if (obj instanceof LinkedList<?>){
+				if(((LinkedList<?>)obj).get(0) instanceof Team){
+					teamList=(LinkedList<Team>)obj;
+				}
+			}
+			obj=ois.readObject();
+			if (obj instanceof LinkedList<?>){
+				if(((LinkedList<?>)obj).get(0) instanceof Race){
+					raceList=(LinkedList<Race>)obj;
+				}
+			}
+			obj=ois.readObject();
+			if (obj instanceof LinkedList<?>){
+				if(((LinkedList<?>)obj).get(0) instanceof Stage){
+					stageList=(LinkedList<Stage>)obj;
+				}
+			}
+			obj=ois.readObject();
+			if (obj instanceof LinkedList<?>){
+				if(((LinkedList<?>)obj).get(0) instanceof Segment){
+					segmentList=(LinkedList<Segment>)obj;
+				}
+			}
+			obj=ois.readObject();
+			if (obj instanceof LinkedList<?>){
+				if(((LinkedList<?>)obj).get(0) instanceof RiderStageResults){
+					riderStageResultsList=(LinkedList<RiderStageResults>)obj;
+				}
 			}
 		}
-		obj=ois.readObject();
-		if (obj instanceof ArrayList<?>){
-			if(((ArrayList<?>)obj).get(0) instanceof Race){
-				raceList=(ArrayList<Race>)obj;
-			}
+		catch(IOException e){
+			throw new IOException("Failed to load contents from file");
 		}
-		obj=ois.readObject();
-		if (obj instanceof ArrayList<?>){
-			if(((ArrayList<?>)obj).get(0) instanceof Stage){
-				stageList=(ArrayList<Stage>)obj;
-			}
+		catch(ClassNotFoundException e)
+		{
+			throw new ClassNotFoundException("Required class files not found");
 		}
-		obj=ois.readObject();
-		if (obj instanceof ArrayList<?>){
-			if(((ArrayList<?>)obj).get(0) instanceof Segment){
-				segmentList=(ArrayList<Segment>)obj;
-			}
-		}
-		obj=ois.readObject();
-		if (obj instanceof ArrayList<?>){
-			if(((ArrayList<?>)obj).get(0) instanceof RiderStageResults){
-				riderStageResultsList=(ArrayList<RiderStageResults>)obj;
-			}
-		}
-	}
-	catch(IOException e){
-		throw new IOException("Failed to load contents from file");
-	}
-	catch(ClassNotFoundException e)
-	{
-		throw new ClassNotFoundException("Required class files not found");
-	}
 	}
 
 
@@ -962,7 +961,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The ID does not match any race in the system.");
 		}
-		ArrayList<Rider> riders = ridersTotalAdjustedTime(race);
+		LinkedList<Rider> riders = ridersTotalAdjustedTime(race);
 		LocalTime[] localTimes = new LocalTime[riders.size()];
 		for (int i = 0; i < riders.size(); i++){
 			localTimes[i] = nanoToLocalTime(riders.get(i).getTotalAdjustedTime());
@@ -976,7 +975,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The race ID does not match any race in the system");
 		}
-		ArrayList<Rider> riders = totalRidersPoints(race);
+		LinkedList<Rider> riders = totalRidersPoints(race);
 		sortByTotalElapsedTime(riders);
 		int[] riderPoints = new int[riders.size()];
 		for (int i = 0; i < riders.size(); i++){
@@ -991,7 +990,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The race ID does not match any race in the system");
 		}
-		ArrayList<Rider> riders = totalRidersMountainPoints(race);
+		LinkedList<Rider> riders = totalRidersMountainPoints(race);
 		sortByTotalElapsedTime(riders);
 		int[] riderMountainPoints = new int[riders.size()];
 		for (int i = 0; i < riders.size(); i++){
@@ -1007,7 +1006,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The ID does not match any race in the system.");
 		}
-		ArrayList<Rider> riders = ridersTotalAdjustedTime(race);
+		LinkedList<Rider> riders = ridersTotalAdjustedTime(race);
 
 		int[] riderIds = new int[riders.size()];
 
@@ -1017,7 +1016,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return riderIds;
 	}
 
-	private void sortByTotalPoints(ArrayList<Rider> riders){
+	private void sortByTotalPoints(LinkedList<Rider> riders){
 		riders.sort(Comparator.comparing( (Rider rider) -> (rider.getTotalPoints()*-1 )));
 	}
 
@@ -1028,7 +1027,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The race ID does not match any race in the system");
 		}
-		ArrayList<Rider> riders = totalRidersPoints(race);
+		LinkedList<Rider> riders = totalRidersPoints(race);
 		sortByTotalPoints(riders);
 		int[] riderPointsId = new int[riders.size()];
 		for (int i = 0; i < riders.size(); i++){
@@ -1037,7 +1036,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		return riderPointsId;
 	}
 
-	private void sortByTotalMountainPoints(ArrayList<Rider> riders){
+	private void sortByTotalMountainPoints(LinkedList<Rider> riders){
 		riders.sort(Comparator.comparing( (Rider rider) -> (rider.getTotalMountainPoints()*-1)));
 	}
 
@@ -1047,7 +1046,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 		if (race == null){
 			throw new IDNotRecognisedException("The race ID does not match any race in the system");
 		}
-		ArrayList<Rider> riders = totalRidersMountainPoints(race);
+		LinkedList<Rider> riders = totalRidersMountainPoints(race);
 		sortByTotalMountainPoints(riders);
 		int[] riderMountainPointsId = new int[riders.size()];
 		for (int i = 0; i < riders.size(); i++){
