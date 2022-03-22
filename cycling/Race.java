@@ -1,7 +1,7 @@
 package cycling;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Represents a race.
@@ -11,11 +11,11 @@ import java.util.ArrayList;
  * @version 1.0
  */
 public class Race extends IdHaver implements Serializable {
-  private int id; // ID associated with this race
-  private String name; // Name associated with this race
-  private String description; // Description associated with this race
+  private int id;
+  private String name;
+  private String description;
 
-  ArrayList<Stage> stages = new ArrayList<Stage>(); // An arraylist of stages within this race
+  LinkedList<Stage> stages = new LinkedList<Stage>(); // A Linked List of stages within this race
   private static int numberOfRaces = 0; // The number of the races in existence.
 
   /**
@@ -67,9 +67,9 @@ public class Race extends IdHaver implements Serializable {
   /**
    * Sorts and returns all stages ordered by their location in the race.
    *
-   * @return An ArrayList of stages sorted by their location in the race.
+   * @return An LinkedList of stages sorted by their location in the race.
    */
-  public ArrayList<Stage> getStages() {
+  public LinkedList<Stage> getStages() {
     //sort them here
     stages.sort((o1, o2)
         -> o1.getStartTime().compareTo(
@@ -107,7 +107,7 @@ public class Race extends IdHaver implements Serializable {
   /**
    * Resets the number of races, used when erasing the cycling portal to reset to an empty state.
    */
-  public static void resetIdCounter() {
+  public static void resetId() {
     numberOfRaces = 0;
   }
 }
