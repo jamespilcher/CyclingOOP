@@ -107,7 +107,7 @@ public class Race extends IdHaver implements Serializable {
   /**
    * Resets the number of races, used when erasing the cycling portal to reset to an empty state.
    */
-  public static void resetId() {
+  public static void resetIdCounter() {
     numberOfRaces = 0;
   }
 }
