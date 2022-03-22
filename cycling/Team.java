@@ -10,7 +10,7 @@ import java.util.LinkedList;
  * @author Daniel Moulton
  * @version 1.0
  */
-public class Team extends IdHaver implements Serializable{
+public class Team extends IdHaver implements Serializable {
 
   private int id;
   private String teamName;
@@ -27,7 +27,7 @@ public class Team extends IdHaver implements Serializable{
    * @param teamName Name of the new team
    * @param teamDescription Description of the new team
    */
-  public Team(String teamName, String teamDescription){
+  public Team(String teamName, String teamDescription) {
     this.teamName = teamName;
     this.teamDescription = teamDescription;
     id = ++numberOfTeams;
