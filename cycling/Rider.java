@@ -202,7 +202,7 @@ public class Rider extends IdHaver implements Serializable {
   /**
    * Reset the number of riders, used when erasing the cycling portal to reset to an empty state.
    */
-  public static void resetId() {
+  public static void resetIdCounter() {
     numberofRiders = 0;
   }
 }
