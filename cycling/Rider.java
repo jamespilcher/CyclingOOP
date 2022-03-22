@@ -26,7 +26,8 @@ public class Rider extends IdHaver implements Serializable {
 
   private static int numberofRiders = 0; // Number of riders in the portal.
 
-  private LinkedList<RiderStageResults> riderResultsList = new LinkedList<RiderStageResults>(); 
+  private LinkedList<RiderStageResults> riderResultsList = 
+      new LinkedList<RiderStageResults>();   /* Linked list of rider's results in all stages */
 
 
   /**
