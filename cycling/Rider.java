@@ -8,13 +8,14 @@ import java.util.LinkedList;
  *
  * @author James Pilcher
  * @author Daniel Moulton
+ * @version 1.0
  */
 public class Rider extends IdHaver implements Serializable {
 
-  private int id; // ID of the rider
-  private String riderName; // Name of the rider
-  private int riderYearOfBirth; // Year of birth of the rider
-  private int teamId; // ID of the team the rider belongs to
+  private int id;
+  private String riderName;
+  private int riderYearOfBirth;
+  private int teamId;
 
   private Long totalAdjustedTime = 0L; /* Total time elapsed, adjusted for if a rider finishes
                                         within a second of the rider ahead */
