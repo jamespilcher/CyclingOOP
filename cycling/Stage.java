@@ -98,38 +98,81 @@ public class Stage extends IdHaver implements Serializable {
     return segments;
   }
 
+  /**
+   * Gets the ID of the race the stage belongs to.
+   *
+   * @return race ID
+   */
   public int getRaceId() { 
     return raceId; 
   }
 
+  /**
+   * Gets the type of the stage i.e. FLAT.
+   *
+   * @return stage type
+   */
   public StageType getType() { 
     return type;
   }
 
+  /**
+   * Gets the name of the stage.
+   *
+   * @return stage name
+   */
   public String getStageName() { 
     return stageName;
   }
 
+  /**
+   * Gets the description of the stage.
+   *
+   * @return stage description
+   */
   public String getDescription() { 
     return description;
   }
 
+  /**
+   * Gets the length of the stage.
+   *
+   * @return stage length (in kilometers)
+   */
   public double getLength() { 
     return length;
   }
 
+  /**
+   * Gets the starting time of the stage.
+   *
+   * @return date and time the stage starts
+   */
   public LocalDateTime getStartTime() { 
     return startTime; 
   }
 
+  /**
+   * Gets the current state of the stage i.e. waiting for results.
+   *
+   * @return stage state
+   */
   public String getStageState() { 
     return stageState; 
   }
 
+  /**
+   * Gets list of riders results in this stage.
+   *
+   * @return riders results in this stage.
+   */
   public LinkedList<RiderStageResults> getRiderResultsList() { 
     return riderResultsList; 
   }
 
+  /**
+   * Concludes the stage preparation.
+   */
   public void concludeStageState() {
     this.stageState = "waiting for results";
   }
