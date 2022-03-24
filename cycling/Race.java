@@ -78,15 +78,6 @@ public class Race extends IdHaver implements Serializable {
   }
   
   /**
-   * Gets the ID of the race.
-   *
-   * @return the ID of the race
-   */
-  public int getId() { 
-    return id;
-  }
-  
-  /**
    * Gets the name of the race.
    *
    * @return the name of the race
@@ -107,7 +98,7 @@ public class Race extends IdHaver implements Serializable {
   /**
    * Resets the number of races, used when erasing the cycling portal to reset to an empty state.
    */
-  public static void resetId() {
+  public static void resetIdCounter() {
     numberOfRaces = 0;
   }
 }
