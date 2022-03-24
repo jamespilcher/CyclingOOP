@@ -83,6 +83,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param rider Object of the rider who's results are being deleted
    */
   private void deleteAllRiderResults(Rider rider) {
+	assert rider != null;
     LinkedList<RiderStageResults> riderResultsList = 
         new LinkedList<RiderStageResults>(rider.getRiderResultsList());
     for (RiderStageResults riderStageResults : riderResultsList) {
@@ -117,6 +118,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param team
    */
   private void deleteTeam(Team team) {
+	assert team != null;
     teamList.remove(team.getId());
     LinkedList<Rider> riders = new LinkedList<Rider>(team.getRiders());
     for (Rider rider : riders) {
@@ -131,7 +133,8 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param team
    */
   private void deleteRider(Rider rider, Team team) {
-    riderList.remove(rider);
+    assert rider != null;
+	riderList.remove(rider);
     deleteAllRiderResults(rider);
     team.removeRider(rider);
   }
@@ -141,6 +144,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param race
    */
   private void deleteRace(Race race) {
+	assert race != null;
     raceList.remove(race);
     LinkedList<Stage> raceStages = new LinkedList<Stage>(race.getStages());
     for (Stage stage : raceStages) {
@@ -155,7 +159,8 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param race
    */
   private void deleteStage(Stage stage, Race race) {
-    stageList.remove(stage);
+    assert stage != null;
+	stageList.remove(stage);
     race.removeStage(stage);
     LinkedList<Segment> stageSegments = new LinkedList<Segment>(stage.getSegments());
     for (Segment segment : stageSegments) {
@@ -171,7 +176,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param stage
    */
   private void deleteSegment(Segment segment, Stage stage) {
-    segmentList.remove(segment);
+	segmentList.remove(segment);
     stage.removeSegment(segment);
     segment = null;
   }
@@ -267,6 +272,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 
     LinkedList<Integer> pointsToBeAdded = new LinkedList<Integer>();
     sortRidersByElapsedTime(riderResultsList);
+
+	for (RiderStageResults riderStageResults : riderResultsList) {
+		riderStageResults.resetPoints();
+	  }
+	
     int riderResultsListSize = riderResultsList.size();
     StageType stageType = stage.getType();
     switch (stageType) {
@@ -313,7 +323,7 @@ public class CyclingPortal implements CyclingPortalInterface {
     sortRidersByElapsedTime(riderResultsList);
 
     for (RiderStageResults riderStageResults : riderResultsList) {
-      riderStageResults.setMountainPoints(0);
+      riderStageResults.resetMountainPoints();
     }
 
     LinkedList<Segment> segments = new LinkedList<Segment>(stage.getSegments());
@@ -352,9 +362,9 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private LinkedList<Rider> totalRidersPoints(Race race) {
     LinkedList<Rider> riders = new LinkedList<Rider>();
-    for (Rider allRider : riderList) {
-      allRider.setTotalElapsedTime(0L);
-      allRider.setTotalPoints(0);
+    for (Rider rider : riderList) {
+		rider.resetTotalElapsedTime();
+		rider.resetTotalPoints();
     }
 
     for (Stage stage : race.getStages()) {
@@ -378,9 +388,9 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private LinkedList<Rider> totalRidersMountainPoints(Race race) {
     LinkedList<Rider> riders = new LinkedList<Rider>();
-    for (Rider allRider : riderList) {
-      allRider.setTotalElapsedTime(0L);
-      allRider.setTotalMountainPoints(0);
+    for (Rider rider : riderList) {
+		rider.resetTotalElapsedTime();
+		rider.resetTotalMountainPoints();
     }
     for (Stage stage : race.getStages()) {
       awardMountainPointsInStage(stage);
@@ -421,8 +431,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   private LinkedList<Rider> ridersTotalAdjustedTime(Race race) {
 
     LinkedList<Rider> riders = new LinkedList<Rider>();
-    for (Rider allRider : riderList) {
-      allRider.setTotalAdjustedTime(0L);
+    for (Rider rider : riderList) {
+      rider.resetTotalAdjustedTime();
     }
     for (Stage stage : race.getStages()) {
       LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
@@ -637,7 +647,7 @@ public class CyclingPortal implements CyclingPortalInterface {
     if (stage.getStageState() == "waiting for results") {
       throw new InvalidStageStateException("Stage preparation has already been concluded.");
     }
-    stage.setStageState("waiting for results");
+    stage.concludeStageState();
   }
 
   @Override
@@ -763,8 +773,7 @@ public class CyclingPortal implements CyclingPortalInterface {
         "The number checkpoint times don't match the number of segments (+2)");
     }
 
-    int raceId = stage.getRaceId();
-    RiderStageResults riderStageResults = new RiderStageResults(rider, stage, raceId, checkpoints);
+    RiderStageResults riderStageResults = new RiderStageResults(rider, stage, checkpoints);
     stage.addRiderResultToStage(riderStageResults);
     riderStageResultsList.add(riderStageResults);
     rider.addStageResults(riderStageResults);
@@ -777,7 +786,8 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param nanoseconds the time in nanoseconds to convert
    */
   private LocalTime nanoToLocalTime(Long nanoseconds) {
-    int second = (int) (nanoseconds / 1000_000_000); 
+    assert nanoseconds != null;
+	int second = (int) (nanoseconds / 1000_000_000); 
     int minute = (int) (second / 60);
     int hour = (int) (minute / 60);
 
