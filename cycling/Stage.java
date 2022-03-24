@@ -97,10 +97,6 @@ public class Stage extends IdHaver implements Serializable {
         o2.getLocation()));
     return segments;
   }
-      
-  public int getId() { 
-    return id; 
-  }
 
   public int getRaceId() { 
     return raceId; 
@@ -134,8 +130,8 @@ public class Stage extends IdHaver implements Serializable {
     return riderResultsList; 
   }
 
-  public void setStageState(String stageState) {
-    this.stageState = stageState;
+  public void concludeStageState() {
+    this.stageState = "waiting for results";
   }
 
   /**
