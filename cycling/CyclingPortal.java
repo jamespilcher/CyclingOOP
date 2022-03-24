@@ -65,7 +65,8 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param objectList List of objects to search through
    * @return the object with that ID, or null if no such object exists
    */
-  private <T extends IdHaver> T correspondingObjectFinder(int id, LinkedList<T> objectList) {
+  private <T extends IdHaver> T correspondingObjectFinder(int id, LinkedList<T> objectList, 
+  String objectType)  throws IDNotRecognisedException{ 
     T correspondingObject = null;
     for (T object : objectList) {
       if (id == object.getId()) {
@@ -73,7 +74,24 @@ public class CyclingPortal implements CyclingPortalInterface {
         break;
       }
     }
+    if (correspondingObject == null){
+      throw new IDNotRecognisedException(objectType + " ID " + id +
+       " not recognised in the system.");
+    }
     return correspondingObject;
+  }
+
+  private void validNameChecker(String name, String objectType) throws InvalidNameException{
+    if (name == null || name == "" || name.length() > 30 || name.contains(" ")) {
+      throw new InvalidNameException( objectType +
+          " name is null, empty, has more than 30 characters, or has whitespaces");
+    }
+  }
+
+  private void validStageStateChecker(String stageState) throws InvalidStageStateException{
+    if (stageState == "waiting for results") {
+      throw new InvalidStageStateException("Stage preparation has been concluded.");
+    }
   }
 
   /**
@@ -83,7 +101,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param rider Object of the rider who's results are being deleted
    */
   private void deleteAllRiderResults(Rider rider) {
-	assert rider != null;
+	  assert rider != null;
     LinkedList<RiderStageResults> riderResultsList = 
         new LinkedList<RiderStageResults>(rider.getRiderResultsList());
     for (RiderStageResults riderStageResults : riderResultsList) {
@@ -118,7 +136,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param team
    */
   private void deleteTeam(Team team) {
-	assert team != null;
+	  assert team != null;
     teamList.remove(team.getId());
     LinkedList<Rider> riders = new LinkedList<Rider>(team.getRiders());
     for (Rider rider : riders) {
@@ -134,7 +152,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private void deleteRider(Rider rider, Team team) {
     assert rider != null;
-	riderList.remove(rider);
+	  riderList.remove(rider);
     deleteAllRiderResults(rider);
     team.removeRider(rider);
   }
@@ -144,7 +162,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param race
    */
   private void deleteRace(Race race) {
-	assert race != null;
+	  assert race != null;
     raceList.remove(race);
     LinkedList<Stage> raceStages = new LinkedList<Stage>(race.getStages());
     for (Stage stage : raceStages) {
@@ -188,7 +206,6 @@ public class CyclingPortal implements CyclingPortalInterface {
   private void sortRidersByElapsedTime(LinkedList<RiderStageResults> competingRiders) {
     competingRiders.sort(Comparator.comparing((RiderStageResults rider) 
         -> rider.getElapsedTimeForStage()));
-
   }
 
   /**
@@ -464,10 +481,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public int createRace(String name, String description) 
       throws IllegalNameException, InvalidNameException {
-    if ((name == null) || name == "" || name.length() > 30 || name.contains(" ")) {
-      throw new InvalidNameException(
-          "Race name is null, empty, has more than 30 chars, or has whitespaces");
-    }  
+    validNameChecker(name, "Race");
     for (Race race : raceList) {
       if (name == race.getName()) {
         throw new IllegalNameException("Race name already exists in the platform.");
@@ -480,10 +494,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public String viewRaceDetails(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The Race ID does not match to any race in the system.");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     String details;
     String name = race.getName();
     String description = race.getDescription();
@@ -497,20 +508,13 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public void removeRaceById(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException(
-        "The given Race ID does not match to any race in the system");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     deleteRace(race);
   }
 
   @Override
   public int getNumberOfStages(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("Race Id not recognised");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     return race.getStages().size();
   }
 
@@ -518,11 +522,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   public int addStageToRace(int raceId, String stageName, String description, double length, 
       LocalDateTime startTime, StageType type) throws IDNotRecognisedException, 
       IllegalNameException, InvalidNameException, InvalidLengthException {
-    if ((stageName == null) || stageName == "" || stageName.length() > 30 
-        || stageName.contains(" ")) {
-      throw new InvalidNameException(
-        "Stage name is null, empty, has more than 30 chars, or has whitespaces");
-    }  
+    validNameChecker(stageName, "Stage");
     if (length < 5D) {
       throw new InvalidLengthException("Length is less than 5km");
     }
@@ -531,10 +531,7 @@ public class CyclingPortal implements CyclingPortalInterface {
         throw new IllegalNameException("Stage name already exists in the platform.");
       }
     }
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The ID does not match to any race in the system.");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     Stage newStage = new Stage(raceId, stageName, description, length, startTime, type);
     race.addStage(newStage);
     stageList.add(newStage);
@@ -543,10 +540,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRaceStages(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The race ID is not recognised in the system");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     List<Integer> stageIds = new LinkedList<Integer>();
     for (Stage stage : race.getStages()) {
       stageIds.add(stage.getId());
@@ -556,20 +550,14 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public double getStageLength(int stageId) throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("Stage ID not recognized");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
     return stage.getLength();
   }
 
   @Override
   public void removeStageById(int stageId) throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The ID does not match any Stage");
-    }
-    Race raceContainingStage = correspondingObjectFinder(stage.getRaceId(), raceList);
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
+    Race raceContainingStage = correspondingObjectFinder(stage.getRaceId(), raceList, "Race");
     deleteStage(stage, raceContainingStage);
   }
 
@@ -577,14 +565,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   public int addCategorizedClimbToStage(int stageId, Double location, SegmentType type, 
       Double averageGradient, Double length) throws IDNotRecognisedException, 
       InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-
-    if (stage == null) {
-      throw new IDNotRecognisedException("The ID does not match to any race in the system.");
-    }
-    if (stage.getStageState() == "waiting for results") {
-      throw new InvalidStageStateException("Stage preparation has been concluded.");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
+    validStageStateChecker(stage.getStageState());
     if (stage.getType() == StageType.TT) {
       throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");
     }
@@ -602,13 +584,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   public int addIntermediateSprintToStage(int stageId, double location) 
       throws IDNotRecognisedException, InvalidLocationException, 
       InvalidStageStateException, InvalidStageTypeException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The ID does not match to any stage in the system.");
-    }
-    if (stage.getStageState() == "waiting for results") {
-      throw new InvalidStageStateException("Stage preparation has been concluded.");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList,"Stage");
+    validStageStateChecker(stage.getStageState());
     if (stage.getType() == StageType.TT) {
       throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");
     }
@@ -625,37 +602,23 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public void removeSegment(int segmentId) throws IDNotRecognisedException, 
       InvalidStageStateException {
-    Segment segment = correspondingObjectFinder(segmentId, segmentList);
-    if (segment == null) {
-      throw new IDNotRecognisedException(
-          "The given segment ID does not match any segment in the system");
-    }
-    Stage stageContainingSegment = correspondingObjectFinder(segment.getStageId(), stageList);
-    if (stageContainingSegment.getStageState() == "waiting for results") {
-      throw new InvalidStageStateException("Stage preparation has been concluded.");
-    }
+    Segment segment = correspondingObjectFinder(segmentId, segmentList, "Segment");
+    Stage stageContainingSegment = correspondingObjectFinder(segment.getStageId(), stageList, "Stage");
+    validStageStateChecker(stageContainingSegment.getStageState());
     deleteSegment(segment, stageContainingSegment);
   }
 
   @Override
   public void concludeStagePreparation(int stageId) throws 
       IDNotRecognisedException, InvalidStageStateException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stageId does not match any stage in the system.");
-    }
-    if (stage.getStageState() == "waiting for results") {
-      throw new InvalidStageStateException("Stage preparation has already been concluded.");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
+    validStageStateChecker(stage.getStageState());
     stage.concludeStageState();
   }
 
   @Override
   public int[] getStageSegments(int stageId) throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stage ID is not recognised in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
     List<Integer> segmentIds = new LinkedList<Integer>();
     for (Segment segment : stage.getSegments()) {
       segmentIds.add(segment.getId());
@@ -666,10 +629,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public int createTeam(String name, String description) 
       throws IllegalNameException, InvalidNameException {
-    if (name == null || name == "" || name.length() > 30 || name.contains(" ")) {
-      throw new InvalidNameException(
-          "Team name is null, empty, has more than 30 characters, or has whitespaces");
-    }
+    validNameChecker(name, "Team");
     for (Team team : teamList) { 
       if (name == team.getTeamName()) {
         throw new IllegalNameException("Team name already exists in the platform");
@@ -682,10 +642,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public void removeTeam(int teamId) throws IDNotRecognisedException {
-    Team team = correspondingObjectFinder(teamId, teamList);
-    if (team == null) {
-      throw new IDNotRecognisedException("No team found with ID " + teamId);
-    }
+    Team team = correspondingObjectFinder(teamId, teamList, "Team");
     deleteTeam(team);
   }
 
@@ -702,10 +659,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   public int[] getTeamRiders(int teamId) throws IDNotRecognisedException {
     List<Rider> ridersInTeam = new LinkedList<Rider>();
     List<Integer> teamRidersIds = new LinkedList<Integer>();
-    Team team = correspondingObjectFinder(teamId, teamList);
-    if (team == null) {
-      throw new IDNotRecognisedException("No team found with ID " + teamId);
-    }
+    Team team = correspondingObjectFinder(teamId, teamList, "Team");
     ridersInTeam = team.getRiders();
     for (Rider rider : ridersInTeam) {
       teamRidersIds.add(rider.getId());
@@ -720,12 +674,7 @@ public class CyclingPortal implements CyclingPortalInterface {
       throw new IllegalArgumentException(
           "Name of rider is null or year of birth is less than 1900");
     }
-    Team team = correspondingObjectFinder(teamId, teamList);
-    if (team == null) {
-      throw new IDNotRecognisedException(
-          "The given team ID does not match to any team in the system");
-    }
-
+    Team team = correspondingObjectFinder(teamId, teamList, "Team");
     Rider newRider = new Rider(yearOfBirth, name, teamId);
     riderList.add(newRider);
     team.addRider(newRider);
@@ -734,11 +683,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public void removeRider(int riderId) throws IDNotRecognisedException {
-    Rider rider = correspondingObjectFinder(riderId, riderList);
-    if (rider == null) {
-      throw new IDNotRecognisedException("The ID does not match any rider in the system");
-    }
-    Team teamContainingRider = correspondingObjectFinder(rider.getTeamId(), teamList);
+    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
+    Team teamContainingRider = correspondingObjectFinder(rider.getTeamId(), teamList, "Team");
     deleteRider(rider, teamContainingRider);
   }
 
@@ -747,18 +693,12 @@ public class CyclingPortal implements CyclingPortalInterface {
       throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
       InvalidStageStateException {
 
-    Rider rider = correspondingObjectFinder(riderId, riderList);
-    if (rider == null) {
-      throw new IDNotRecognisedException("The  ID does not match to any rider system.");
-    }
+    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
 
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The  ID does not match to any stage system.");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
     if (!(stage.getStageState() == "waiting for results")) {
-      throw new IDNotRecognisedException("Stage has not finished preparation");
+      throw new InvalidStageStateException("Stage has not concluded preparation.");
     }
 
     for (RiderStageResults riderStageResults : stage.getRiderResultsList()) {
@@ -787,7 +727,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private LocalTime nanoToLocalTime(Long nanoseconds) {
     assert nanoseconds != null;
-	int second = (int) (nanoseconds / 1000_000_000); 
+	  int second = (int) (nanoseconds / 1000_000_000); 
     int minute = (int) (second / 60);
     int hour = (int) (minute / 60);
 
@@ -802,21 +742,10 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public LocalTime[] getRiderResultsInStage(int stageId, int riderId) 
       throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    Rider rider = correspondingObjectFinder(riderId, riderList);
-
-    if (stage == null) {
-      throw new IDNotRecognisedException("The  ID does not match any stage in the system.");
-
-    }
-
-    if (rider == null) {
-      throw new IDNotRecognisedException("The  ID does not match any rider in the system.");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
+    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
     LinkedList<Long> times = new LinkedList<Long>();
     LinkedList<LocalTime> results = new LinkedList<LocalTime>();
-
-    //throw exceptions///
 
     for (RiderStageResults riderStageResults : rider.getRiderResultsList()) {
       if (riderStageResults.getStage() == stage) {
@@ -836,15 +765,9 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) 
       throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
-    Rider rider = correspondingObjectFinder(riderId, riderList);
-    if (rider == null) {
-      throw new IDNotRecognisedException("The rider ID does not match any rider in the system");
-    }
+    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
 
     LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
     adjustRiderTimesInStage(riderResultsList);
@@ -862,14 +785,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
 
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-    if (stage == null) {
-      throw new IDNotRecognisedException("The ID does not match any stage in the system");
-    }
-    Rider rider = correspondingObjectFinder(riderId, riderList);
-    if (rider == null) {
-      throw new IDNotRecognisedException("The ID does not match any rider in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
+    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
 
     LinkedList<RiderStageResults> riderResultsList 
         = new LinkedList<RiderStageResults>(stage.getRiderResultsList());
@@ -884,11 +801,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
     LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
     int[] riderIds = new int[riderResultsList.size()];
@@ -903,11 +816,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId)
       throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
     LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
     LocalTime[] localTimes = new LocalTime[riderResultsList.size()];
@@ -920,11 +829,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
     awardPointsInStage(stage);
     LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
@@ -940,11 +845,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
-    Stage stage = correspondingObjectFinder(stageId, stageList);
-
-    if (stage == null) {
-      throw new IDNotRecognisedException("The stage ID does not match any stage in the system");
-    }
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
     awardMountainPointsInStage(stage);
     LinkedList<RiderStageResults> riderResultsList = stage.getRiderResultsList();
@@ -1072,10 +973,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public LocalTime[] getGeneralClassificationTimesInRace(int raceId) 
       throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The ID does not match any race in the system.");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     LinkedList<Rider> riders = ridersTotalAdjustedTime(race);
     LocalTime[] localTimes = new LocalTime[riders.size()];
     for (int i = 0; i < riders.size(); i++) {
@@ -1086,10 +984,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The race ID does not match any race in the system");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     LinkedList<Rider> riders = totalRidersPoints(race);
     sortByTotalElapsedTime(riders);
     int[] riderPoints = new int[riders.size()];
@@ -1101,10 +996,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The race ID does not match any race in the system");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     LinkedList<Rider> riders = totalRidersMountainPoints(race);
     sortByTotalElapsedTime(riders);
     int[] riderMountainPoints = new int[riders.size()];
@@ -1116,11 +1008,8 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   @Override
   public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
 
-    if (race == null) {
-      throw new IDNotRecognisedException("The ID does not match any race in the system.");
-    }
     LinkedList<Rider> riders = ridersTotalAdjustedTime(race);
 
     int[] riderIds = new int[riders.size()];
@@ -1138,10 +1027,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
 
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The race ID does not match any race in the system");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     LinkedList<Rider> riders = totalRidersPoints(race);
     sortByTotalPoints(riders);
     int[] riderPointsId = new int[riders.size()];
@@ -1162,10 +1048,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   @Override
   public int[] getRidersMountainPointClassificationRank(int raceId) 
       throws IDNotRecognisedException {
-    Race race = correspondingObjectFinder(raceId, raceList);
-    if (race == null) {
-      throw new IDNotRecognisedException("The race ID does not match any race in the system");
-    }
+    Race race = correspondingObjectFinder(raceId, raceList, "Race");
     LinkedList<Rider> riders = totalRidersMountainPoints(race);
     sortByTotalMountainPoints(riders);
     int[] riderMountainPointsId = new int[riders.size()];
