@@ -31,14 +31,29 @@ public class Segment extends IdHaver implements Serializable {
     super.setId(id);
   }
 
+  /**
+   * Gets the location of the segment with the stage.
+   *
+   * @return segment's location (in kilometers)
+   */
   public Double getLocation() { 
     return location;
   }
 
+  /**
+   * Gets the type of the segment i.e. Sprint.
+   *
+   * @return segment's type
+   */
   public SegmentType getSegmentType() { 
     return type; 
   }
 
+  /**
+   * Gets the ID of the stage the segment belongs to.
+   *
+   * @return stage ID
+   */
   public int getStageId() { 
     return stageId; 
   }
