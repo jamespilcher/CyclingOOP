@@ -31,7 +31,6 @@ public class RiderStageResults implements Serializable {
    *
    * @param rider the rider the results relate to
    * @param stage the stage the results relate to
-   * @param raceId the ID of the race the stage belongs to
    * @param checkpoints time at each checkpoint in the stage for the rider
    */
   public RiderStageResults(Rider rider, Stage stage, LocalTime... checkpoints) {
