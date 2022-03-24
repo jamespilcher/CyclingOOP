@@ -109,7 +109,6 @@ public class CyclingPortal implements CyclingPortalInterface {
       throw new InvalidStageStateException("Stage preparation has been concluded.");
     }
   }
-
   /**
    * Goes through each RiderStageResult object associated with the rider and passes this to
    * deleteRiderResult which will delete the results.
