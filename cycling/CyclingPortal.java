@@ -25,28 +25,28 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   //Array of segment points to be awarded depending on position (and type)
   private static final Integer[] SPRINT_SEGMENT_POINTS = 
-      {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
   private static final Integer[] HC_SEGMENT_POINTS = 
-      {20, 15, 12, 10, 8, 6, 4, 2};
+    {20, 15, 12, 10, 8, 6, 4, 2};
   private static final Integer[] C1_SEGMENT_POINTS = 
-      {10, 8, 6, 4, 2, 1};
+    {10, 8, 6, 4, 2, 1};
   private static final Integer[] C2_SEGMENT_POINTS = 
-      {5, 3, 2, 1};
+    {5, 3, 2, 1};
   private static final Integer[] C3_SEGMENT_POINTS = 
-      {2, 1};
+    {2, 1};
   private static final Integer[] C4_SEGMENT_POINTS =
-      {1};
+    {1};
 
   //Array of stage points to be awarded depending on position (and type)
 
   private static final Integer[] FLAT_STAGE_POINTS = 
-      {50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2};
+    {50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2};
   private static final Integer[] MM_STAGE_POINTS = 
-      {30, 25, 22, 19, 17, 15, 13, 11, 9, 7, 6, 5, 4, 3, 2};
+    {30, 25, 22, 19, 17, 15, 13, 11, 9, 7, 6, 5, 4, 3, 2};
   private static final Integer[] HM_STAGE_POINTS = 
-      {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5,  4, 3, 2, 1};
+    {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5,  4, 3, 2, 1};
   private static final Integer[] TT_STAGE_POINTS = 
-      {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 
   private LinkedList<Rider> riderList = new LinkedList<Rider>(); // List of riders
 
@@ -128,6 +128,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Deletes a riderStageResults object, removes all references to it.
+   *
    * @param riderStageResults rider result object to be deleted.
    */
   private void deleteRiderResult(RiderStageResults riderStageResults) {
@@ -138,6 +139,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Deletes all the results in a given stage.
+   *
    * @param stage Stage for results to be deleted within.
    */
   private void deleteAllStageResults(Stage stage) {
@@ -150,6 +152,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Deletes a Team, all references to it, and all of its riders.
+   *
    * @param team Team to be deleted.
    */
   private void deleteTeam(Team team) {
@@ -164,6 +167,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Deletes a Rider, all references to them, and all of their corresponding results.
+   *
    * @param rider Rider to be deleted.
    * @param team Team the rider belongs to.
    */
@@ -176,6 +180,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Deletes a race, all references to it, and all of its corresponding results.
+   *
    * @param race Race to be deleted.
    */
   private void deleteRace(Race race) {
@@ -190,6 +195,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Deletes a stage, all references to it, and all of its corresponding results.
+   *
    * @param stage Stage to be deleted.
    * @param race Race the stage belongs to.
    */
@@ -207,6 +213,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Removes a segment from a given stage.
+   *
    * @param segment Segment to be deleted.
    * @param stage Stage the segment belongs to.
    */
@@ -218,6 +225,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Sorts a list of riders results by their elapsed time attribute.
+   *
    * @param competingRiders List of ridersResults in a stage.
    */
   private void sortRidersByElapsedTime(LinkedList<RiderStageResults> competingRiders) {
@@ -228,6 +236,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   /**
    * Adjusts all riders times in a stage. If one finishes within one second of another,
    * their time is bumped to the lowest of the two. This cascades all the way down.
+   *
    * @param competingRiders List of rider results in the stage.
    */
   private void adjustRiderTimesInStage(LinkedList<RiderStageResults> competingRiders) {
@@ -251,10 +260,11 @@ public class CyclingPortal implements CyclingPortalInterface {
   /**
    * This function appends the 0's to the pointsToBeAdded array, depending on the number of
    * riders in a given stage/segment.
+   *
    * @param numRiders number of riders in the stage/segment.
    * @param rankPoints Array of points that index's match the position in a segment/race,
       and the points match the points awarded to those positions.
-   * @return
+   * @return number of points to add.
    */
   private LinkedList<Integer> pointsToBeAddedFormatter(int numRiders, Integer[] rankPoints) {
     int rankPointsSize = rankPoints.length;
@@ -273,6 +283,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * Awards each rider in a segment their segment points, given their position and the
    * type of segment.
    * Mountain or sprint segments are decided by the boolean variable isSprintSegment
+   *
    * @param competingRiders List of riders who competed in the segment.
    * @param segment The segment we want to award points within.
    * @param stageSegments List of all segments in the stage the segment is in.
@@ -305,6 +316,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   /**
    * Awards all the riders in a given stage their (sprint) points. Points are awarded to their
    * Corresponding riderStageResults object.
+   *
    * @param stage The stage to award (sprint) points within.
    */
   private void awardPointsInStage(Stage stage) {
@@ -356,6 +368,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   /**
    * Awards all the riders in a given stage their mountain points. Points are awarded to their
    * Corresponding riderStageResults object.
+   *
    * @param stage The stage to award mountain points within.
    */
   private void awardMountainPointsInStage(Stage stage) {
@@ -399,6 +412,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Awards every rider in a given race their total Points classification points.
+   *
    * @param race The specified race to sum total (sprint) points within
    * @return Returns the list of riders in the given race
        now with their awarded total (sprint) points.
@@ -426,6 +440,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Awards every rider in a given race their total Mountain classification points.
+   *
    * @param race The specified race to sum total mountain points within
    * @return Returns the list of riders in the given race, 
        now with their total mountain points awarded
@@ -453,6 +468,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Sorts riders by their total elapsed time.
+   *
    * @param riders List of riders to be sorted.
    */
   private void sortByTotalElapsedTime(LinkedList<Rider> riders) {
@@ -461,6 +477,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Sorts riders by their total adjusted time.
+   *
    * @param riders List of riders to be sorted.
    */
   private void sortByTotalAdjustedTime(LinkedList<Rider> riders) {
@@ -469,6 +486,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Adjusts all rider times within a specified race, and returns them.
+   *
    * @param race The specified race.
    * @return A list of riders who competed in the race, sorted by
      their total adjusted time.
@@ -612,7 +630,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   public int addIntermediateSprintToStage(int stageId, double location) 
       throws IDNotRecognisedException, InvalidLocationException, 
       InvalidStageStateException, InvalidStageTypeException {
-    Stage stage = correspondingObjectFinder(stageId, stageList,"Stage");
+    Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
     validStageStateChecker(stage.getStageState());
     if (stage.getType() == StageType.TT) {
       throw new InvalidStageTypeException("Time-trial stages cannot contain any segment.");
@@ -1049,6 +1067,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Sorts the list of riders by their total (sprint) points.
+   *
    * @param riders List of riders to be sorted.
    */
   private void sortByTotalPoints(LinkedList<Rider> riders) {
@@ -1070,6 +1089,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   /**
    * Sorts the list of riders by their total mountain points.
+   *
    * @param riders List of riders to be sorted.
    */
   private void sortByTotalMountainPoints(LinkedList<Rider> riders) {
