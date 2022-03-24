@@ -103,24 +103,6 @@ public class Rider extends IdHaver implements Serializable {
   }
 
   /**
-   * Used to set/change the team ID of the rider.
-   *
-   * @param teamId ID of the team the rider belongs to
-   */
-  public void setTeamId(int teamId) {
-    this.teamId = teamId;
-  }
-
-  /**
-   * Gets the ID of the rider.
-   *
-   * @return ID of the rider.
-   */
-  public int getId() {
-    return id;
-  }
-
-  /**
    * Gets total time taken by rider.
    *
    * @return total time taken by rider
@@ -148,39 +130,31 @@ public class Rider extends IdHaver implements Serializable {
   }
 
   /**
-   * Sets the total adjusted time for the rider.
-   *
-   * @param time Value to set total adjusted time to.
+   * Resets the total adjusted time for the rider to 0.
    */
-  public void setTotalAdjustedTime(Long time) {
-    totalAdjustedTime = time;
+  public void resetTotalAdjustedTime() {
+    totalAdjustedTime = 0L;
   }
 
   /**
-   * Set total elapsed time for the rider.
-   *
-   * @param time Value to set total elapsed time to.
+   * Resets the total elapsed time for the rider to 0.
    */
-  public void setTotalElapsedTime(Long time) {
-    totalElapsedTime = time;
+  public void resetTotalElapsedTime() {
+    totalElapsedTime = 0L;
   }
 
   /**
-   * Set total points for the rider.
-   *
-   * @param points Value to set total points to.
+   * Reset the total points for the rider to 0.
    */
-  public void setTotalPoints(int points) {
-    totalPoints = points;
+  public void resetTotalPoints() {
+    totalPoints = 0;
   }
 
   /**
-   * Set total mountain points for the rider.
-   *
-   * @param points Value to set total mountain points to
+   * Reset the total mountain points for the rider to 0.
    */
-  public void setTotalMountainPoints(int points) {
-    totalMountainPoints = points;
+  public void resetTotalMountainPoints() {
+    totalMountainPoints = 0;
   }
 
   /**
