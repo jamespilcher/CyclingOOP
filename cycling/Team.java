@@ -52,11 +52,20 @@ public class Team extends IdHaver implements Serializable {
     riders.remove(rider);
   }
 
-  
+  /**
+   * Gets a list of all riders belonging to the team.
+   *
+   * @return list of riders
+   */
   public LinkedList<Rider> getRiders() {
     return riders;
   }
 
+  /**
+   * Gets the name of the team.
+   *
+   * @return the team name
+   */
   public String getTeamName() {
     return teamName;
   }
