@@ -22,6 +22,8 @@ import java.util.List;
  *
  */
 public class CyclingPortal implements CyclingPortalInterface {
+
+  //Array of segment points to be awarded depending on position (and type)
   private static final Integer[] SPRINT_SEGMENT_POINTS = 
     {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
   private static final Integer[] HC_SEGMENT_POINTS = 
@@ -32,7 +34,10 @@ public class CyclingPortal implements CyclingPortalInterface {
     {5, 3, 2, 1};
   private static final Integer[] C3_SEGMENT_POINTS = 
     {2, 1};
-  private static final Integer[] C4_SEGMENT_POINTS = {1};
+  private static final Integer[] C4_SEGMENT_POINTS =
+    {1};
+
+  //Array of stage points to be awarded depending on position (and type)
 
   private static final Integer[] FLAT_STAGE_POINTS = 
     {50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2};
@@ -63,7 +68,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    *
    * @param id ID of object to find
    * @param objectList List of objects to search through
-   * @return the object with that ID, or null if no such object exists
+   * @return The object with that ID, or null if no such object exists
    */
   private <T extends IdHaver> T correspondingObjectFinder(int id, LinkedList<T> objectList, 
   String objectType)  throws IDNotRecognisedException{ 
@@ -81,13 +86,24 @@ public class CyclingPortal implements CyclingPortalInterface {
     return correspondingObject;
   }
 
+  /**
+   * Will throw an InvalidNameException, if the object name is null, empty, 
+   * has more than 30 characters, or has whitespaces 
+   *
+   * @param name Proposed name of a team/stage/race
+   * @param objectType Denotes whether it is a team/stage/race.
+   */
   private void validNameChecker(String name, String objectType) throws InvalidNameException{
     if (name == null || name == "" || name.length() > 30 || name.contains(" ")) {
       throw new InvalidNameException( objectType +
           " name is null, empty, has more than 30 characters, or has whitespaces");
     }
   }
-
+  /**
+   * Will throw an InvalidStageStateException, if the stage is waiting for results
+   *
+   * @param stageState String of the current stage state
+   */
   private void validStageStateChecker(String stageState) throws InvalidStageStateException{
     if (stageState == "waiting for results") {
       throw new InvalidStageStateException("Stage preparation has been concluded.");
@@ -98,7 +114,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * Goes through each RiderStageResult object associated with the rider and passes this to
    * deleteRiderResult which will delete the results.
    *
-   * @param rider Object of the rider who's results are being deleted
+   * @param rider Object of the rider who's results are being deleted.
    */
   private void deleteAllRiderResults(Rider rider) {
 	  assert rider != null;
@@ -110,8 +126,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param riderStageResults
+   * Deletes a riderStageResults object, removes all references to it
+   * @param riderStageResults rider result object to be deleted.
    */
   private void deleteRiderResult(RiderStageResults riderStageResults) {
     riderStageResults.getStage().getRiderResultsList().remove(riderStageResults);
@@ -120,8 +136,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param stage
+   * Deletes all the results in a given stage.
+   * @param stage Stage for results to be deleted within.
    */
   private void deleteAllStageResults(Stage stage) {
     LinkedList<RiderStageResults> riderResultsList 
@@ -132,8 +148,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param team
+   * Deletes a Team, all references to it, and all of its riders.
+   * @param team Team to be deleted.
    */
   private void deleteTeam(Team team) {
 	  assert team != null;
@@ -146,9 +162,9 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param rider
-   * @param team
+   * Deletes a Rider, all references to them, and all of their corresponding results.
+   * @param rider Rider to be deleted.
+   * @param team Team the rider belongs to.
    */
   private void deleteRider(Rider rider, Team team) {
     assert rider != null;
@@ -158,8 +174,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param race
+   * Deletes a race, all references to it, and all of its corresponding results.
+   * @param race Race to be deleted.
    */
   private void deleteRace(Race race) {
 	  assert race != null;
@@ -172,13 +188,13 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param stage
-   * @param race
+   * Deletes a stage, all references to it, and all of its corresponding results.
+   * @param stage Stage to be deleted.
+   * @param race Race the stage belongs to.
    */
   private void deleteStage(Stage stage, Race race) {
     assert stage != null;
-	stageList.remove(stage);
+	  stageList.remove(stage);
     race.removeStage(stage);
     LinkedList<Segment> stageSegments = new LinkedList<Segment>(stage.getSegments());
     for (Segment segment : stageSegments) {
@@ -189,9 +205,9 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param segment
-   * @param stage
+   * Removes a segment from a given stage.
+   * @param segment Segment to be deleted.
+   * @param stage Stage the segment belongs to.
    */
   private void deleteSegment(Segment segment, Stage stage) {
 	segmentList.remove(segment);
@@ -200,8 +216,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param competingRiders
+   * Sorts a list of riders results by their elapsed time attribute.
+   * @param competingRiders List of ridersResults in a stage.
    */
   private void sortRidersByElapsedTime(LinkedList<RiderStageResults> competingRiders) {
     competingRiders.sort(Comparator.comparing((RiderStageResults rider) 
@@ -209,8 +225,9 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param competingRiders
+   * Adjusts all riders times in a stage. If one finishes within one second of another,
+   * their time is bumped to the lowest of the two. This cascades all the way down.
+   * @param competingRiders List of rider results in the stage.
    */
   private void adjustRiderTimesInStage(LinkedList<RiderStageResults> competingRiders) {
     sortRidersByElapsedTime(competingRiders);
@@ -231,9 +248,11 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
   /**
-   * 
-   * @param numRiders
-   * @param rankPoints
+   * This function appends the 0's to the pointsToBeAdded array, depending on the number of
+   * riders in a given stage/segment.
+   * @param numRiders number of riders in the stage/segment.
+   * @param rankPoints Array of points that index's match the position in a segment/race,
+   * and the points match the points awarded to those positions.
    * @return
    */
   private LinkedList<Integer> pointsToBeAddedFormatter(int numRiders, Integer[] rankPoints) {
@@ -250,12 +269,15 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param competingRiders
-   * @param segment
-   * @param stageSegments
-   * @param segmentPointsToBeAdded
-   * @param isSprintSegment
+   * Awards each rider in a segment their segment points, given their position and the
+   * type of segment.
+   * Mountain or sprint segments are decided by the boolean variable isSprintSegment
+   * @param competingRiders List of riders who competed in the segment.
+   * @param segment The segment we want to award points within.
+   * @param stageSegments List of all segments in the stage the segment is in.
+   * @param segmentPointsToBeAdded List of segment points to be added,
+   * the index corresponds to position
+   * @param isSprintSegment Do we want to award a sprint segment or a mountain segment?
    */
   private void awardSegmentPoints(LinkedList<RiderStageResults> competingRiders, Segment segment, 
       LinkedList<Segment> stageSegments, LinkedList<Integer> segmentPointsToBeAdded, 
@@ -280,8 +302,9 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param stage
+   * Awards all the riders in a given stage their (sprint) points. Points are awarded to their
+   * Corresponding riderStageResults object.
+   * @param stage The stage to award (sprint) points within.
    */
   private void awardPointsInStage(Stage stage) {
     LinkedList<RiderStageResults> riderResultsList 
@@ -330,8 +353,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
   /**
-   * 
-   * @param stage
+   * Awards all the riders in a given stage their mountain points. Points are awarded to their
+   * Corresponding riderStageResults object.
+   * @param stage The stage to award mountain points within.
    */
   private void awardMountainPointsInStage(Stage stage) {
     LinkedList<RiderStageResults> riderResultsList 
@@ -373,9 +397,10 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param race
-   * @return
+   * Awards every rider in a given race their total Points classification points.
+   * @param race The specified race to sum total (sprint) points within
+   * @return Returns the list of riders in the given race
+   * now with their awarded total (sprint) points.
    */
   private LinkedList<Rider> totalRidersPoints(Race race) {
     LinkedList<Rider> riders = new LinkedList<Rider>();
@@ -399,9 +424,10 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param race
-   * @return
+   * Awards every rider in a given race their total Mountain classification points.
+   * @param race The specified race to sum total mountain points within
+   * @return Returns the list of riders in the given race, 
+   * now with their total mountain points awarded
    */
   private LinkedList<Rider> totalRidersMountainPoints(Race race) {
     LinkedList<Rider> riders = new LinkedList<Rider>();
@@ -425,25 +451,26 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
   /**
-   * 
-   * @param riders
+   * Sorts riders by their total elapsed time.
+   * @param riders List of riders to be sorted.
    */
   private void sortByTotalElapsedTime(LinkedList<Rider> riders) {
     riders.sort(Comparator.comparing((Rider rider) -> rider.getTotalElapsedTime()));
   }
 
   /**
-   * 
-   * @param riders
+   * Sorts riders by their total adjusted time.
+   * @param riders List of riders to be sorted.
    */
   private void sortByTotalAdjustedTime(LinkedList<Rider> riders) {
     riders.sort(Comparator.comparing((Rider rider) -> rider.getTotalAdjustedTime()));
   }
 
   /**
-   * 
-   * @param race
-   * @return
+   * Adjusts all rider times within a specified race, and returns them
+   * @param race The specified race.
+   * @return A list of riders who competed in the race, sorted by
+   * their total adjusted time
    */
   private LinkedList<Rider> ridersTotalAdjustedTime(Race race) {
 
@@ -721,9 +748,9 @@ public class CyclingPortal implements CyclingPortalInterface {
 
 
   /**
-   * Converts a time in nanoseconds into the LocalTime format.
+   * Converts a time in nanoseconds into the h/m/s/nanoseconds LocalTime format.
    *
-   * @param nanoseconds the time in nanoseconds to convert
+   * @param nanoseconds The time in nanoseconds to be converted.
    */
   private LocalTime nanoToLocalTime(Long nanoseconds) {
     assert nanoseconds != null;
@@ -1020,6 +1047,10 @@ public class CyclingPortal implements CyclingPortalInterface {
     return riderIds;
   }
 
+  /**
+   * Sorts the list of riders by their total (sprint) points
+   * @param riders List of riders to be sorted.
+   */
   private void sortByTotalPoints(LinkedList<Rider> riders) {
     riders.sort(Comparator.comparing((Rider rider) -> (rider.getTotalPoints() * -1)));
   }
@@ -1038,8 +1069,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * 
-   * @param riders
+   * Sorts the list of riders by their total mountain points
+   * @param riders List of riders to be sorted.
    */
   private void sortByTotalMountainPoints(LinkedList<Rider> riders) {
     riders.sort(Comparator.comparing((Rider rider) -> (rider.getTotalMountainPoints() * -1)));
