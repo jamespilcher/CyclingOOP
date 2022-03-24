@@ -31,10 +31,6 @@ public class Segment extends IdHaver implements Serializable {
     super.setId(id);
   }
 
-  public int getId() { 
-    return id; 
-  }
-
   public Double getLocation() { 
     return location;
   }
@@ -43,7 +39,7 @@ public class Segment extends IdHaver implements Serializable {
     return type; 
   }
 
-  public int getstageId() { 
+  public int getStageId() { 
     return stageId; 
   }
 
