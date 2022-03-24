@@ -18,13 +18,14 @@ public class RiderStageResults implements Serializable {
   private Stage stage;
   private Long startTime;
 
-  Long elapsedTimeForStage; // Time taken for the stage 
-  Long adjustedTimeForStage; /* Time taken for the stage, adjusted for if a rider finishes
+  private Long elapsedTimeForStage; // Time taken for the stage 
+  private Long adjustedTimeForStage; /* Time taken for the stage, adjusted for if a rider finishes
                             within a second of the rider ahead */
-  LinkedList<Long> segmentTimes = new LinkedList<Long>(); // List of rider's times in each segment
+  private LinkedList<Long> segmentTimes 
+      = new LinkedList<Long>(); // List of rider's times in each segment
 
-  int riderPoints = 0;
-  int riderMountainPoints = 0;
+  private int riderPoints = 0;
+  private int riderMountainPoints = 0;
 
   /**
    * Constructor for the RiderStageResults class.
