@@ -16,7 +16,6 @@ import java.util.LinkedList;
 public class RiderStageResults implements Serializable {
   private Rider rider;
   private Stage stage;
-  private int raceId;
   private Long startTime;
 
   Long elapsedTimeForStage; // Time taken for the stage 
@@ -35,10 +34,9 @@ public class RiderStageResults implements Serializable {
    * @param raceId the ID of the race the stage belongs to
    * @param checkpoints time at each checkpoint in the stage for the rider
    */
-  public RiderStageResults(Rider rider, Stage stage, int raceId, LocalTime... checkpoints) {
+  public RiderStageResults(Rider rider, Stage stage, LocalTime... checkpoints) {
     this.rider = rider;
     this.stage = stage;
-    this.raceId = raceId;
     startTime = checkpoints[0].toNanoOfDay();
     elapsedTimeForStage 
         = checkpoints[0].until(checkpoints[checkpoints.length - 1], ChronoUnit.NANOS);
@@ -48,12 +46,18 @@ public class RiderStageResults implements Serializable {
   }
 
   /**
-   *  Set rider's mountain points to specified value.
-   *
-   * @param points value to set mountain points to
+   *  Reset rider's points to 0.
    */
-  public void setMountainPoints(int points) {
-    riderPoints = points;
+  public void resetPoints() {
+    riderPoints = 0;
+  }
+
+
+  /**
+   *  Reset rider's mountain points to 0.
+   */
+  public void resetMountainPoints() {
+    riderMountainPoints = 0;
   }
 
   /**
@@ -109,15 +113,6 @@ public class RiderStageResults implements Serializable {
    */
   public Long getElapsedTimeForStage() { 
     return elapsedTimeForStage;
-  }
-
-  /**
-   * Gets ID of the race the stage is a part of.
-   *
-   * @return race ID
-   */
-  public int getRaceId() { 
-    return raceId;
   }
 
   /**
