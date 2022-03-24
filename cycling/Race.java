@@ -15,7 +15,8 @@ public class Race extends IdHaver implements Serializable {
   private String name;
   private String description;
 
-  private LinkedList<Stage> stages = new LinkedList<Stage>(); // A Linked List of stages within this race
+  private LinkedList<Stage> stages 
+      = new LinkedList<Stage>(); // A Linked List of stages within this race
   private static int numberOfRaces = 0; // The number of the races in existence.
 
   /**
