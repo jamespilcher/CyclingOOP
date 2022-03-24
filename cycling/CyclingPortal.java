@@ -25,28 +25,28 @@ public class CyclingPortal implements CyclingPortalInterface {
 
   //Array of segment points to be awarded depending on position (and type)
   private static final Integer[] SPRINT_SEGMENT_POINTS = 
-    {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+      {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
   private static final Integer[] HC_SEGMENT_POINTS = 
-    {20, 15, 12, 10, 8, 6, 4, 2};
+      {20, 15, 12, 10, 8, 6, 4, 2};
   private static final Integer[] C1_SEGMENT_POINTS = 
-    {10, 8, 6, 4, 2, 1};
+      {10, 8, 6, 4, 2, 1};
   private static final Integer[] C2_SEGMENT_POINTS = 
-    {5, 3, 2, 1};
+      {5, 3, 2, 1};
   private static final Integer[] C3_SEGMENT_POINTS = 
-    {2, 1};
+      {2, 1};
   private static final Integer[] C4_SEGMENT_POINTS =
-    {1};
+      {1};
 
   //Array of stage points to be awarded depending on position (and type)
 
   private static final Integer[] FLAT_STAGE_POINTS = 
-    {50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2};
+      {50, 30, 20, 18, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 2};
   private static final Integer[] MM_STAGE_POINTS = 
-    {30, 25, 22, 19, 17, 15, 13, 11, 9, 7, 6, 5, 4, 3, 2};
+      {30, 25, 22, 19, 17, 15, 13, 11, 9, 7, 6, 5, 4, 3, 2};
   private static final Integer[] HM_STAGE_POINTS = 
-    {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5,  4, 3, 2, 1};
+      {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5,  4, 3, 2, 1};
   private static final Integer[] TT_STAGE_POINTS = 
-    {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+      {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 
   private LinkedList<Rider> riderList = new LinkedList<Rider>(); // List of riders
 
@@ -71,7 +71,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @return The object with that ID, or null if no such object exists
    */
   private <T extends IdHaver> T correspondingObjectFinder(int id, LinkedList<T> objectList, 
-  String objectType)  throws IDNotRecognisedException{ 
+      String objectType)  throws IDNotRecognisedException {
     T correspondingObject = null;
     for (T object : objectList) {
       if (id == object.getId()) {
@@ -79,36 +79,38 @@ public class CyclingPortal implements CyclingPortalInterface {
         break;
       }
     }
-    if (correspondingObject == null){
-      throw new IDNotRecognisedException(objectType + " ID " + id +
-       " not recognised in the system.");
+    if (correspondingObject == null) {
+      throw new IDNotRecognisedException(objectType + " ID " + id
+        + " not recognised in the system.");
     }
     return correspondingObject;
   }
 
   /**
-   * Will throw an InvalidNameException, if the object name is null, empty, 
-   * has more than 30 characters, or has whitespaces 
+   * Will throw an InvalidNameException, if the object name is null, empty,
+   * has more than 30 characters, or has whitespaces.
    *
    * @param name Proposed name of a team/stage/race
    * @param objectType Denotes whether it is a team/stage/race.
    */
-  private void validNameChecker(String name, String objectType) throws InvalidNameException{
+  private void validNameChecker(String name, String objectType) throws InvalidNameException {
     if (name == null || name == "" || name.length() > 30 || name.contains(" ")) {
-      throw new InvalidNameException( objectType +
-          " name is null, empty, has more than 30 characters, or has whitespaces");
+      throw new InvalidNameException(objectType
+        +  " name is null, empty, has more than 30 characters, or has whitespaces");
     }
   }
+
   /**
-   * Will throw an InvalidStageStateException, if the stage is waiting for results
+   * Will throw an InvalidStageStateException if the stage is waiting for results.
    *
    * @param stageState String of the current stage state
    */
-  private void validStageStateChecker(String stageState) throws InvalidStageStateException{
+  private void validStageStateChecker(String stageState) throws InvalidStageStateException {
     if (stageState == "waiting for results") {
       throw new InvalidStageStateException("Stage preparation has been concluded.");
     }
   }
+
   /**
    * Goes through each RiderStageResult object associated with the rider and passes this to
    * deleteRiderResult which will delete the results.
@@ -116,7 +118,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param rider Object of the rider who's results are being deleted.
    */
   private void deleteAllRiderResults(Rider rider) {
-	  assert rider != null;
+    assert rider != null;
     LinkedList<RiderStageResults> riderResultsList = 
         new LinkedList<RiderStageResults>(rider.getRiderResultsList());
     for (RiderStageResults riderStageResults : riderResultsList) {
@@ -125,7 +127,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * Deletes a riderStageResults object, removes all references to it
+   * Deletes a riderStageResults object, removes all references to it.
    * @param riderStageResults rider result object to be deleted.
    */
   private void deleteRiderResult(RiderStageResults riderStageResults) {
@@ -151,7 +153,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param team Team to be deleted.
    */
   private void deleteTeam(Team team) {
-	  assert team != null;
+    assert team != null;
     teamList.remove(team.getId());
     LinkedList<Rider> riders = new LinkedList<Rider>(team.getRiders());
     for (Rider rider : riders) {
@@ -167,7 +169,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private void deleteRider(Rider rider, Team team) {
     assert rider != null;
-	  riderList.remove(rider);
+    riderList.remove(rider);
     deleteAllRiderResults(rider);
     team.removeRider(rider);
   }
@@ -177,7 +179,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param race Race to be deleted.
    */
   private void deleteRace(Race race) {
-	  assert race != null;
+    assert race != null;
     raceList.remove(race);
     LinkedList<Stage> raceStages = new LinkedList<Stage>(race.getStages());
     for (Stage stage : raceStages) {
@@ -193,7 +195,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private void deleteStage(Stage stage, Race race) {
     assert stage != null;
-	  stageList.remove(stage);
+    stageList.remove(stage);
     race.removeStage(stage);
     LinkedList<Segment> stageSegments = new LinkedList<Segment>(stage.getSegments());
     for (Segment segment : stageSegments) {
@@ -209,7 +211,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param stage Stage the segment belongs to.
    */
   private void deleteSegment(Segment segment, Stage stage) {
-	segmentList.remove(segment);
+    segmentList.remove(segment);
     stage.removeSegment(segment);
     segment = null;
   }
@@ -251,7 +253,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * riders in a given stage/segment.
    * @param numRiders number of riders in the stage/segment.
    * @param rankPoints Array of points that index's match the position in a segment/race,
-   * and the points match the points awarded to those positions.
+      and the points match the points awarded to those positions.
    * @return
    */
   private LinkedList<Integer> pointsToBeAddedFormatter(int numRiders, Integer[] rankPoints) {
@@ -275,7 +277,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    * @param segment The segment we want to award points within.
    * @param stageSegments List of all segments in the stage the segment is in.
    * @param segmentPointsToBeAdded List of segment points to be added,
-   * the index corresponds to position
+       the index corresponds to position
    * @param isSprintSegment Do we want to award a sprint segment or a mountain segment?
    */
   private void awardSegmentPoints(LinkedList<RiderStageResults> competingRiders, Segment segment, 
@@ -312,10 +314,10 @@ public class CyclingPortal implements CyclingPortalInterface {
     LinkedList<Integer> pointsToBeAdded = new LinkedList<Integer>();
     sortRidersByElapsedTime(riderResultsList);
 
-	for (RiderStageResults riderStageResults : riderResultsList) {
-		riderStageResults.resetPoints();
-	  }
-	
+    for (RiderStageResults riderStageResults : riderResultsList) {
+      riderStageResults.resetPoints();
+    }
+
     int riderResultsListSize = riderResultsList.size();
     StageType stageType = stage.getType();
     switch (stageType) {
@@ -399,13 +401,13 @@ public class CyclingPortal implements CyclingPortalInterface {
    * Awards every rider in a given race their total Points classification points.
    * @param race The specified race to sum total (sprint) points within
    * @return Returns the list of riders in the given race
-   * now with their awarded total (sprint) points.
+       now with their awarded total (sprint) points.
    */
   private LinkedList<Rider> totalRidersPoints(Race race) {
     LinkedList<Rider> riders = new LinkedList<Rider>();
     for (Rider rider : riderList) {
-		rider.resetTotalElapsedTime();
-		rider.resetTotalPoints();
+      rider.resetTotalElapsedTime();
+      rider.resetTotalPoints();
     }
 
     for (Stage stage : race.getStages()) {
@@ -426,13 +428,13 @@ public class CyclingPortal implements CyclingPortalInterface {
    * Awards every rider in a given race their total Mountain classification points.
    * @param race The specified race to sum total mountain points within
    * @return Returns the list of riders in the given race, 
-   * now with their total mountain points awarded
+       now with their total mountain points awarded
    */
   private LinkedList<Rider> totalRidersMountainPoints(Race race) {
     LinkedList<Rider> riders = new LinkedList<Rider>();
     for (Rider rider : riderList) {
-		rider.resetTotalElapsedTime();
-		rider.resetTotalMountainPoints();
+      rider.resetTotalElapsedTime();
+      rider.resetTotalMountainPoints();
     }
     for (Stage stage : race.getStages()) {
       awardMountainPointsInStage(stage);
@@ -466,10 +468,10 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * Adjusts all rider times within a specified race, and returns them
+   * Adjusts all rider times within a specified race, and returns them.
    * @param race The specified race.
    * @return A list of riders who competed in the race, sorted by
-   * their total adjusted time
+     their total adjusted time.
    */
   private LinkedList<Rider> ridersTotalAdjustedTime(Race race) {
 
@@ -629,7 +631,8 @@ public class CyclingPortal implements CyclingPortalInterface {
   public void removeSegment(int segmentId) throws IDNotRecognisedException, 
       InvalidStageStateException {
     Segment segment = correspondingObjectFinder(segmentId, segmentList, "Segment");
-    Stage stageContainingSegment = correspondingObjectFinder(segment.getStageId(), stageList, "Stage");
+    Stage stageContainingSegment = correspondingObjectFinder(segment.getStageId(),
+          stageList, "Stage");
     validStageStateChecker(stageContainingSegment.getStageState());
     deleteSegment(segment, stageContainingSegment);
   }
@@ -718,9 +721,6 @@ public class CyclingPortal implements CyclingPortalInterface {
   public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
       throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
       InvalidStageStateException {
-
-    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
-
     Stage stage = correspondingObjectFinder(stageId, stageList, "Stage");
 
     if (!(stage.getStageState() == "waiting for results")) {
@@ -739,6 +739,7 @@ public class CyclingPortal implements CyclingPortalInterface {
         "The number checkpoint times don't match the number of segments (+2)");
     }
 
+    Rider rider = correspondingObjectFinder(riderId, riderList, "Rider");
     RiderStageResults riderStageResults = new RiderStageResults(rider, stage, checkpoints);
     stage.addRiderResultToStage(riderStageResults);
     riderStageResultsList.add(riderStageResults);
@@ -753,7 +754,7 @@ public class CyclingPortal implements CyclingPortalInterface {
    */
   private LocalTime nanoToLocalTime(Long nanoseconds) {
     assert nanoseconds != null;
-	  int second = (int) (nanoseconds / 1000_000_000); 
+    int second = (int) (nanoseconds / 1000_000_000); 
     int minute = (int) (second / 60);
     int hour = (int) (minute / 60);
 
