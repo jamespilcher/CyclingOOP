@@ -10,15 +10,21 @@ package cycling;
 public class IdHaver {
   private int id;
 
+  
   /** 
+   * Gets ID of object.
+   *
    * @return int
    */
   public int getId() { 
     return id;
   }
 
+  
   /** 
-   * @param id
+   * Sets ID of object.
+   *
+   * @param id value to set ID to
    */
   public void setId(int id) { 
     this.id = id;
