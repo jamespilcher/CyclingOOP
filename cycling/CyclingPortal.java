@@ -1048,7 +1048,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * Sorts the list of riders by their total (sprint) points
+   * Sorts the list of riders by their total (sprint) points.
    * @param riders List of riders to be sorted.
    */
   private void sortByTotalPoints(LinkedList<Rider> riders) {
@@ -1069,7 +1069,7 @@ public class CyclingPortal implements CyclingPortalInterface {
   }
 
   /**
-   * Sorts the list of riders by their total mountain points
+   * Sorts the list of riders by their total mountain points.
    * @param riders List of riders to be sorted.
    */
   private void sortByTotalMountainPoints(LinkedList<Rider> riders) {
