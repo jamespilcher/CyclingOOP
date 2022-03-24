@@ -57,16 +57,8 @@ public class Team extends IdHaver implements Serializable {
     return riders;
   }
 
-  public int getId() {
-    return id;
-  }
-
   public String getTeamName() {
     return teamName;
-  }
-
-  public String getTeamDescription() {
-    return teamDescription;
   }
 
   /**
